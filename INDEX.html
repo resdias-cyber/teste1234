@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DRE — SIM.DIGITAL</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0f1e;
+    --bg2: #0e1526;
+    --bg3: #141c33;
+    --card: #111827;
+    --border: #1e2d4a;
+    --accent: #00d4aa;
+    --accent2: #3b82f6;
+    --accent3: #f59e0b;
+    --danger: #ef4444;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --subtle: #94a3b8;
+    --green: #22c55e;
+    --radius: 12px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    padding: 0 0 60px;
+  }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, #0a0f1e 0%, #0d1e3d 50%, #091529 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 32px 48px 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(0,212,170,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .brand {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .brand-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .brand-icon {
+    width: 42px; height: 42px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+  }
+  .brand-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    color: #fff;
+    letter-spacing: -0.5px;
+  }
+  .brand-sub {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-left: 54px;
+  }
+  .header-meta {
+    text-align: right;
+  }
+  .periodo-badge {
+    display: inline-block;
+    background: rgba(0,212,170,0.12);
+    border: 1px solid rgba(0,212,170,0.3);
+    color: var(--accent);
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .update-time {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  /* KPI STRIP */
+  .kpi-strip {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 0 48px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+  }
+  .kpi-item {
+    padding: 24px 28px;
+    border-right: 1px solid var(--border);
+    position: relative;
+    animation: fadeUp 0.5s ease both;
+  }
+  .kpi-item:nth-child(1) { animation-delay: 0.1s; }
+  .kpi-item:nth-child(2) { animation-delay: 0.2s; }
+  .kpi-item:nth-child(3) { animation-delay: 0.3s; }
+  .kpi-item:nth-child(4) { animation-delay: 0.4s; border-right: none; }
+  .kpi-label {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .kpi-value {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 26px;
+    color: #fff;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .kpi-value.accent { color: var(--accent); }
+  .kpi-value.green { color: var(--green); }
+  .kpi-value.blue { color: var(--accent2); }
+  .kpi-pct {
+    font-size: 11px;
+    color: var(--subtle);
+  }
+  .kpi-pct.pos { color: var(--green); }
+  .kpi-bar {
+    position: absolute;
+    bottom: 0; left: 0;
+    height: 3px;
+    background: var(--accent);
+    opacity: 0.6;
+    border-radius: 0 3px 0 0;
+    transition: width 1s ease;
+  }
+
+  /* MAIN CONTENT */
+  main {
+    padding: 40px 48px;
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 28px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* SECTION TITLES */
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* CARD */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    animation: fadeUp 0.6s ease both;
+  }
+  .card-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.3px;
+  }
+  .card-body { padding: 0; }
+
+  /* DRE TABLE */
+  .dre-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .dre-table tr { border-bottom: 1px solid rgba(30,45,74,0.5); }
+  .dre-table tr:last-child { border-bottom: none; }
+  .dre-table td {
+    padding: 9px 24px;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+  .dre-table .row-group {
+    background: rgba(59,130,246,0.06);
+  }
+  .dre-table .row-group td:first-child {
+    font-family: 'Syne', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--accent2);
+    padding-top: 14px;
+    padding-bottom: 8px;
+  }
+  .dre-table .row-item td:first-child {
+    color: var(--subtle);
+    padding-left: 36px;
+  }
+  .dre-table .row-subtotal td {
+    background: rgba(0,212,170,0.04);
+    border-top: 1px solid rgba(0,212,170,0.15);
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+  .dre-table .row-subtotal td:first-child {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .dre-table .row-result td {
+    background: rgba(0,212,170,0.08);
+    border-top: 2px solid var(--accent);
+    padding-top: 14px;
+    padding-bottom: 14px;
+  }
+  .dre-table .row-result td:first-child {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: -0.3px;
+  }
+  .val {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .val.neg { color: var(--danger); }
+  .val.pos { color: var(--green); }
+  .val.neutral { color: var(--text); }
+  .val.strong { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; color: var(--accent); }
+  .av {
+    text-align: right;
+    font-size: 11px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .av.neg { color: rgba(239,68,68,0.7); }
+  .av.pos { color: rgba(34,197,94,0.7); }
+
+  /* RIGHT COLUMN */
+  .right-col { display: flex; flex-direction: column; gap: 28px; }
+
+  /* SALDO CARD */
+  .saldo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+  }
+  .saldo-cell {
+    background: var(--card);
+    padding: 20px 22px;
+  }
+  .saldo-cell.full { grid-column: 1 / -1; }
+  .saldo-label {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .saldo-val {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    color: #fff;
+  }
+  .saldo-val.accent { color: var(--accent); font-size: 24px; }
+  .saldo-bank {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* MARGENS */
+  .margens-list { padding: 8px 0; }
+  .margem-row {
+    display: flex;
+    align-items: center;
+    padding: 12px 24px;
+    border-bottom: 1px solid rgba(30,45,74,0.5);
+    gap: 16px;
+  }
+  .margem-row:last-child { border-bottom: none; }
+  .margem-name {
+    font-size: 12px;
+    color: var(--subtle);
+    flex: 1;
+  }
+  .margem-bar-wrap {
+    flex: 2;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .margem-bar {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 1.2s ease;
+  }
+  .margem-pct {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    width: 52px;
+    text-align: right;
+  }
+
+  /* RECEITA POR TIPO */
+  .donut-section { padding: 20px 24px; }
+  .receita-tipos { display: flex; flex-direction: column; gap: 10px; }
+  .tipo-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .tipo-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .tipo-name { font-size: 12px; color: var(--subtle); flex: 1; }
+  .tipo-val { font-size: 12px; color: var(--text); font-variant-numeric: tabular-nums; text-align: right; min-width: 110px; }
+  .tipo-pct { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 12px; min-width: 46px; text-align: right; }
+
+  /* TOP DESPESAS */
+  .desp-list { padding: 4px 0; }
+  .desp-row {
+    display: flex;
+    align-items: center;
+    padding: 10px 24px;
+    border-bottom: 1px solid rgba(30,45,74,0.3);
+    gap: 12px;
+  }
+  .desp-row:last-child { border-bottom: none; }
+  .desp-rank {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    color: var(--border);
+    width: 18px;
+    flex-shrink: 0;
+  }
+  .desp-name { font-size: 11px; color: var(--subtle); flex: 1; }
+  .desp-bar-wrap { width: 80px; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .desp-bar { height: 100%; background: var(--accent3); border-radius: 2px; }
+  .desp-val { font-size: 11px; color: var(--text); text-align: right; min-width: 90px; font-variant-numeric: tabular-nums; }
+  .desp-pct { font-size: 10px; color: var(--muted); min-width: 40px; text-align: right; }
+
+  /* BANCO COMPARISON */
+  .banco-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+  }
+  .banco-cell {
+    background: var(--card);
+    padding: 20px 24px;
+  }
+  .banco-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .banco-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+    font-size: 11px;
+    border-bottom: 1px solid rgba(30,45,74,0.3);
+  }
+  .banco-row:last-child { border-bottom: none; }
+  .banco-row .lbl { color: var(--muted); }
+  .banco-row .v { font-variant-numeric: tabular-nums; }
+  .banco-row .v.pos { color: var(--green); }
+  .banco-row .v.neg { color: var(--danger); }
+  .banco-row .v.accent { color: var(--accent); font-weight: 700; }
+
+  /* CUSTOS */
+  .custo-row {
+    display: flex;
+    align-items: center;
+    padding: 10px 24px;
+    border-bottom: 1px solid rgba(30,45,74,0.3);
+    gap: 12px;
+  }
+  .custo-row:last-child { border-bottom: none; }
+  .custo-name { font-size: 12px; color: var(--subtle); flex: 1; }
+  .custo-bar-wrap { width: 80px; height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .custo-bar { height: 100%; border-radius: 3px; }
+  .custo-val { font-size: 12px; color: var(--text); text-align: right; min-width: 100px; font-variant-numeric: tabular-nums; }
+  .custo-pct { font-size: 11px; color: var(--muted); min-width: 40px; text-align: right; }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    padding: 24px;
+    font-size: 10px;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    letter-spacing: 1px;
+    margin-top: 20px;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .card:nth-child(1) { animation-delay: 0.1s; }
+  .card:nth-child(2) { animation-delay: 0.2s; }
+  .card:nth-child(3) { animation-delay: 0.3s; }
+  .card:nth-child(4) { animation-delay: 0.4s; }
+
+  /* TAG */
+  .tag {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+  }
+  .tag.success { background: rgba(34,197,94,0.12); color: var(--green); border: 1px solid rgba(34,197,94,0.25); }
+  .tag.info { background: rgba(59,130,246,0.12); color: var(--accent2); border: 1px solid rgba(59,130,246,0.25); }
+
+  /* RESPONSIVE */
+  @media (max-width: 1100px) {
+    main { grid-template-columns: 1fr; }
+    .kpi-strip { grid-template-columns: repeat(2, 1fr); }
+    .kpi-item:nth-child(2) { border-right: none; }
+    .kpi-item:nth-child(4) { border-top: 1px solid var(--border); }
+  }
+  @media (max-width: 640px) {
+    header { padding: 24px 20px; }
+    main { padding: 24px 20px; }
+    .kpi-strip { padding: 0 20px; grid-template-columns: 1fr 1fr; }
+    .kpi-item { padding: 16px; }
+    .kpi-value { font-size: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div class="brand">
+      <div class="brand-logo">
+        <div class="brand-name">SIM.DIGITAL</div>
+      </div>
+      <div class="brand-sub" style="margin-left:0;margin-top:4px;">DRE Gerencial — SIM.DIGITAL — REDEMETRO TELECOMUNICAÇÕES LTDA</div>
+    </div>
+    <div class="header-meta">
+      <div class="periodo-badge">01/03/2026 — 20/03/2026</div>
+      <div class="update-time">Atualizado em 20/03/2026 às 11:03</div>
+    </div>
+  </div>
+</header>
+
+<!-- KPI STRIP -->
+<div class="kpi-strip">
+  <div class="kpi-item">
+    <div class="kpi-label">Receita Líquida</div>
+    <div class="kpi-value accent">R$ 1.306.112</div>
+    <div class="kpi-pct">AV 100,0%</div>
+    <div class="kpi-bar" style="width:100%"></div>
+  </div>
+  <div class="kpi-item">
+    <div class="kpi-label">Lucro Bruto</div>
+    <div class="kpi-value">R$ 1.084.958</div>
+    <div class="kpi-pct pos">Margem 83,1%</div>
+    <div class="kpi-bar" style="width:84%; background: var(--accent2)"></div>
+  </div>
+  <div class="kpi-item">
+    <div class="kpi-label">EBITDA (aprox.)</div>
+    <div class="kpi-value blue">R$ 462.328</div>
+    <div class="kpi-pct pos">Margem 35,4%</div>
+    <div class="kpi-bar" style="width:36%; background: var(--accent2)"></div>
+  </div>
+  <div class="kpi-item">
+    <div class="kpi-label">★ Resultado Líquido</div>
+    <div class="kpi-value green">R$ 288.665</div>
+    <div class="kpi-pct pos">Margem 22,1%</div>
+    <div class="kpi-bar" style="width:22.1%; background: var(--green)"></div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<main>
+
+  <!-- LEFT: DRE COMPLETO -->
+  <div style="display:flex; flex-direction:column; gap:28px;">
+
+    <div class="card" style="animation-delay:0.1s">
+      <div class="card-header">
+        <div class="card-title">Demonstração do Resultado do Exercício</div>
+        <span class="tag success">Consolidado</span>
+      </div>
+      <div class="card-body">
+        <table class="dre-table">
+          <!-- RECEITA -->
+          <tr class="row-group">
+            <td colspan="3">1. Receita Operacional Bruta</td>
+          </tr>
+          <tr class="row-item">
+            <td>Receita PIX (PF)</td>
+            <td class="val pos">R$ 593.232,16</td>
+            <td class="av pos">45,4%</td>
+          </tr>
+          <tr class="row-item">
+            <td>Receita Boletos (PF)</td>
+            <td class="val pos">R$ 552.598,49</td>
+            <td class="av pos">42,3%</td>
+          </tr>
+          <tr class="row-item">
+            <td>Receita PIX (PJ)</td>
+            <td class="val pos">R$ 58.918,59</td>
+            <td class="av pos">4,5%</td>
+          </tr>
+          <tr class="row-item">
+            <td>Receita Boletos (PJ)</td>
+            <td class="val pos">R$ 100.710,50</td>
+            <td class="av pos">7,7%</td>
+          </tr>
+          <tr class="row-item">
+            <td>Rendimentos de Aplicações</td>
+            <td class="val pos">R$ 7,24</td>
+            <td class="av">0,0%</td>
+          </tr>
+          <tr class="row-item">
+            <td>TED Devolvida / Outros</td>
+            <td class="val pos">R$ 644,92</td>
+            <td class="av">0,1%</td>
+          </tr>
+          <tr class="row-subtotal">
+            <td>RECEITA OPERACIONAL LÍQUIDA</td>
+            <td class="val neutral" style="font-family:'Syne',sans-serif;font-weight:700;">R$ 1.306.111,90</td>
+            <td class="av pos">100,0%</td>
+          </tr>
+
+          <!-- CUSTOS -->
+          <tr class="row-group">
+            <td colspan="3">2. Custos dos Serviços Prestados</td>
+          </tr>
+          <tr class="row-item">
+            <td>Links / Conectividade / Telecom</td>
+            <td class="val neg">-R$ 21.497,38</td>
+            <td class="av neg">-1,6%</td>
+          </tr>
+          <tr class="row-item">
+            <td>Equipamentos e Materiais</td>
+            <td class="val neg">-R$ 114.517,46</td>
+            <td class="av neg">-8,8%</td>
+          </tr>
+          <tr class="row-item">
+            <td>Serviços de Infraestrutura</td>
+            <td class="val neg">-R$ 17.595,04</td>
+            <td class="av neg">-1,3%</td>
+          </tr>
+          <tr class="row-item">
+            <td>Energia Elétrica</td>
+            <td class="val neg">-R$ 6.434,31</td>
+            <td class="av neg">-0,5%</td>
+          </tr>
+          <tr class="row-item">
+            <td>SVA (Serviços de Valor Adicionado)</td>
+            <td class="val neg">-R$ 22.390,27</td>
+            <td class="av neg">-1,7%</td>
+          </tr>
+          <tr class="row-subtotal">
+            <td>TOTAL CUSTOS DOS SERVIÇOS</td>
+            <td class="val neg" style="font-family:'Syne',sans-serif;font-weight:700;">-R$ 221.153,93</td>
+            <td class="av neg">-16,9%</td>
+          </tr>
+          <tr class="row-subtotal" style="--accent:var(--accent2)">
+            <td>LUCRO BRUTO</td>
+            <td class="val neutral" style="font-family:'Syne',sans-serif;font-weight:700;color:var(--accent2);">R$ 1.084.957,97</td>
+            <td class="av pos">83,1%</td>
+          </tr>
+
+          <!-- DESPESAS OPERACIONAIS -->
+          <tr class="row-group">
+            <td colspan="3">3. Despesas Operacionais</td>
+          </tr>
+          <tr class="row-item"><td>Folha de Pagamento / Salários</td><td class="val neg">-R$ 222.435,35</td><td class="av neg">-17,0%</td></tr>
+          <tr class="row-item"><td>Pró-labore / Retiradas Sócios</td><td class="val neg">-R$ 52.648,92</td><td class="av neg">-4,0%</td></tr>
+          <tr class="row-item"><td>FGTS / INSS / CEF</td><td class="val neg">-R$ 4.333,67</td><td class="av neg">-0,3%</td></tr>
+          <tr class="row-item"><td>Treinamento e Cursos</td><td class="val neg">-R$ 792,00</td><td class="av neg">-0,1%</td></tr>
+          <tr class="row-item"><td>Medicina do Trabalho</td><td class="val neg">-R$ 0,00</td><td class="av neg">0,0%</td></tr>
+          <tr class="row-item"><td>Impostos (ICMS/SEFAZ)</td><td class="val neg">-R$ 59.149,98</td><td class="av neg">-4,5%</td></tr>
+          <tr class="row-item"><td>Contribuições FUST/FUNTTEL</td><td class="val neg">-R$ 3.393,12</td><td class="av neg">-0,3%</td></tr>
+          <tr class="row-item"><td>Impostos (PIS/COFINS/IRRF)</td><td class="val neg">-R$ 0,00</td><td class="av neg">0,0%</td></tr>
+          <tr class="row-item"><td>Alocação de Recursos (ANATEL/ASN)</td><td class="val neg">-R$ 0,00</td><td class="av neg">0,0%</td></tr>
+          <tr class="row-item"><td>Aluguel de Veículos (Localiza)</td><td class="val neg">-R$ 50.722,20</td><td class="av neg">-3,9%</td></tr>
+          <tr class="row-item"><td>Aluguel de Imóveis</td><td class="val neg">-R$ 12.121,35</td><td class="av neg">-0,9%</td></tr>
+          <tr class="row-item"><td>Aluguel de Imóveis — Aluguel POP</td><td class="val neg">-R$ 0,00</td><td class="av neg">0,0%</td></tr>
+          <tr class="row-item"><td>Software e Tecnologia</td><td class="val neg">-R$ 19.952,63</td><td class="av neg">-1,5%</td></tr>
+          <tr class="row-item"><td>Aluguel de Máquinas e Equipamentos</td><td class="val neg">-R$ 1.368,48</td><td class="av neg">-0,1%</td></tr>
+          <tr class="row-item"><td>Plano de Saúde (Unimed)</td><td class="val neg">-R$ 18.576,13</td><td class="av neg">-1,4%</td></tr>
+          <tr class="row-item"><td>Benefícios (VA/VR/VT)</td><td class="val neg">-R$ 2.274,29</td><td class="av neg">-0,2%</td></tr>
+          <tr class="row-item"><td>Segurança e Limpeza</td><td class="val neg">-R$ 16.239,28</td><td class="av neg">-1,2%</td></tr>
+          <tr class="row-item"><td>Fretes e Entregas</td><td class="val neg">-R$ 0,00</td><td class="av neg">0,0%</td></tr>
+          <tr class="row-item"><td>Reuniões e Eventos</td><td class="val neg">-R$ 158,47</td><td class="av neg">-0,0%</td></tr>
+          <tr class="row-item"><td>Honorários Advocatícios e Contábeis</td><td class="val neg">-R$ 14.849,06</td><td class="av neg">-1,1%</td></tr>
+          <tr class="row-item"><td>Veículos e Manutenção</td><td class="val neg">-R$ 22.219,71</td><td class="av neg">-1,7%</td></tr>
+          <tr class="row-item"><td>Marketing e Publicidade</td><td class="val neg">-R$ 6.350,00</td><td class="av neg">-0,5%</td></tr>
+          <tr class="row-item"><td>Manutenção de Equipamentos</td><td class="val neg">-R$ 0,00</td><td class="av neg">0,0%</td></tr>
+          <tr class="row-item"><td>Manutenção Predial</td><td class="val neg">-R$ 2.100,00</td><td class="av neg">-0,2%</td></tr>
+          <tr class="row-item"><td>Taxas e Contribuições</td><td class="val neg">-R$ 2.770,04</td><td class="av neg">-0,2%</td></tr>
+          <tr class="row-item"><td>Materiais e Suprimentos</td><td class="val neg">-R$ 1.983,58</td><td class="av neg">-0,2%</td></tr>
+          <tr class="row-item"><td>Viagens e Deslocamentos</td><td class="val neg">-R$ 2.132,40</td><td class="av neg">-0,2%</td></tr>
+          <tr class="row-item"><td>Água e Saneamento</td><td class="val neg">-R$ 382,84</td><td class="av neg">-0,0%</td></tr>
+          <tr class="row-item"><td>Serviços e Consultorias</td><td class="val neg">-R$ 18.704,43</td><td class="av neg">-1,4%</td></tr>
+          <tr class="row-item"><td>Despesas Judiciais</td><td class="val neg">-R$ 0,00</td><td class="av neg">0,0%</td></tr>
+          <tr class="row-item"><td>Pensão Alimentícia</td><td class="val neg">-R$ 1.489,81</td><td class="av neg">-0,1%</td></tr>
+          <tr class="row-item"><td>Abatimento Contrato Mútuo</td><td class="val neg">-R$ 100.000,00</td><td class="av neg">-7,8%</td></tr>
+          <tr class="row-item"><td>Distribuição de Lucro</td><td class="val neg">-R$ 100.000,00</td><td class="av neg">-7,8%</td></tr>
+          <tr class="row-subtotal">
+            <td>TOTAL DESPESAS OPERACIONAIS</td>
+            <td class="val neg" style="font-family:'Syne',sans-serif;font-weight:700;">-R$ 737.147,74</td>
+            <td class="av neg">-56,4%</td>
+          </tr>
+
+          <!-- DESPESAS FINANCEIRAS -->
+          <tr class="row-group">
+            <td colspan="3">4. Despesas Financeiras</td>
+          </tr>
+          <tr class="row-item"><td>Empréstimos e Financiamentos</td><td class="val neg">-R$ 42.287,01</td><td class="av neg">-3,2%</td></tr>
+          <tr class="row-item"><td>Tarifas Bancárias</td><td class="val neg">-R$ 5.473,48</td><td class="av neg">-0,4%</td></tr>
+          <tr class="row-item"><td>Fatura Cartão / Outros</td><td class="val neg">-R$ 11.384,52</td><td class="av neg">-0,9%</td></tr>
+          <tr class="row-subtotal">
+            <td>TOTAL DESPESAS FINANCEIRAS</td>
+            <td class="val neg" style="font-family:'Syne',sans-serif;font-weight:700;">-R$ 59.145,01</td>
+            <td class="av neg">-4,5%</td>
+          </tr>
+
+          <!-- RESULTADO -->
+          <tr class="row-result">
+            <td>★ RESULTADO LÍQUIDO DO PERÍODO</td>
+            <td class="val strong">R$ 288.665,22</td>
+            <td class="av pos" style="font-family:'Syne',sans-serif;font-weight:700;font-size:13px;">22,1%</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT COLUMN -->
+  <div class="right-col">
+
+    <!-- SALDO BANCOS -->
+    <div class="card" style="animation-delay:0.15s">
+      <div class="card-header">
+        <div class="card-title">Disponibilidades</div>
+        <span class="tag info">Consolidado</span>
+      </div>
+      <div class="card-body">
+        <div class="saldo-grid">
+          <div class="saldo-cell">
+            <div class="saldo-label">C/C Santander</div>
+            <div class="saldo-val">R$ 551.919,03</div>
+            <div class="saldo-bank">Ag. 1002 | C/C 130026137</div>
+          </div>
+          <div class="saldo-cell">
+            <div class="saldo-label">C/C Sicredi</div>
+            <div class="saldo-val">R$ 8.200,96</div>
+            <div class="saldo-bank">Coop 0116 | C/C 15212-8</div>
+          </div>
+          <div class="saldo-cell">
+            <div class="saldo-label">CDB Santander</div>
+            <div class="saldo-val">R$ 741.591,53</div>
+            <div class="saldo-bank">Investimento</div>
+          </div>
+          <div class="saldo-cell">
+            <div class="saldo-label">Total Disponibilidades</div>
+            <div class="saldo-val accent">R$ 1.301.711,52</div>
+            <div class="saldo-bank">Saldo em 20/03/2026</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MARGENS -->
+    <div class="card" style="animation-delay:0.2s">
+      <div class="card-header">
+        <div class="card-title">Análise de Margens</div>
+      </div>
+      <div class="card-body">
+        <div class="margens-list">
+          <div class="margem-row">
+            <div class="margem-name">Margem Bruta</div>
+            <div class="margem-bar-wrap"><div class="margem-bar" style="width:83.1%;background:var(--accent)"></div></div>
+            <div class="margem-pct" style="color:var(--accent)">83,1%</div>
+          </div>
+          <div class="margem-row">
+            <div class="margem-name">Margem EBITDA</div>
+            <div class="margem-bar-wrap"><div class="margem-bar" style="width:35.4%;background:var(--accent2)"></div></div>
+            <div class="margem-pct" style="color:var(--accent2)">35,4%</div>
+          </div>
+          <div class="margem-row">
+            <div class="margem-name">Margem Operacional</div>
+            <div class="margem-bar-wrap"><div class="margem-bar" style="width:26.6%;background:var(--accent3)"></div></div>
+            <div class="margem-pct" style="color:var(--accent3)">26,6%</div>
+          </div>
+          <div class="margem-row">
+            <div class="margem-name">Margem Líquida</div>
+            <div class="margem-bar-wrap"><div class="margem-bar" style="width:22.1%;background:var(--green)"></div></div>
+            <div class="margem-pct" style="color:var(--green)">22,1%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMPOSIÇÃO RECEITA -->
+    <div class="card" style="animation-delay:0.25s">
+      <div class="card-header">
+        <div class="card-title">Composição da Receita</div>
+      </div>
+      <div class="card-body">
+        <div class="donut-section">
+          <div class="receita-tipos">
+            <div class="tipo-row">
+              <div class="tipo-dot" style="background:var(--accent)"></div>
+              <div class="tipo-name">PIX Pessoa Física</div>
+              <div class="tipo-val">R$ 593.232,16</div>
+              <div class="tipo-pct" style="color:var(--accent)">45,4%</div>
+            </div>
+            <div class="tipo-row">
+              <div class="tipo-dot" style="background:var(--accent2)"></div>
+              <div class="tipo-name">Boletos Pessoa Física</div>
+              <div class="tipo-val">R$ 552.598,49</div>
+              <div class="tipo-pct" style="color:var(--accent2)">42,3%</div>
+            </div>
+            <div class="tipo-row">
+              <div class="tipo-dot" style="background:var(--accent3)"></div>
+              <div class="tipo-name">PIX Pessoa Jurídica</div>
+              <div class="tipo-val">R$ 58.918,59</div>
+              <div class="tipo-pct" style="color:var(--accent3)">4,5%</div>
+            </div>
+            <div class="tipo-row">
+              <div class="tipo-dot" style="background:#a855f7"></div>
+              <div class="tipo-name">Boletos Pessoa Jurídica</div>
+              <div class="tipo-val">R$ 100.710,50</div>
+              <div class="tipo-pct" style="color:#a855f7">7,7%</div>
+            </div>
+            <div class="tipo-row">
+              <div class="tipo-dot" style="background:var(--muted)"></div>
+              <div class="tipo-name">Outros (Rendimentos/TED)</div>
+              <div class="tipo-val">R$ 652,07</div>
+              <div class="tipo-pct" style="color:var(--muted)">0,1%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMPARATIVO BANCOS -->
+    <div class="card" style="animation-delay:0.3s">
+      <div class="card-header">
+        <div class="card-title">Resultado por Banco</div>
+      </div>
+      <div class="card-body">
+        <div class="banco-grid">
+          <div class="banco-cell">
+            <div class="banco-name">🏦 Santander</div>
+            <div class="banco-row"><span class="lbl">Receita</span><span class="v pos">R$ 1.345.652</span></div>
+            <div class="banco-row"><span class="lbl">Custos</span><span class="v neg">-R$ 210.354</span></div>
+            <div class="banco-row"><span class="lbl">Lucro Bruto</span><span class="v">R$ 1.135.298</span></div>
+            <div class="banco-row"><span class="lbl">Desp. Operac.</span><span class="v neg">-R$ 736.819</span></div>
+            <div class="banco-row"><span class="lbl">Desp. Financ.</span><span class="v neg">-R$ 54.790</span></div>
+            <div class="banco-row"><span class="lbl">★ Resultado</span><span class="v accent">R$ 343.689</span></div>
+          </div>
+          <div class="banco-cell">
+            <div class="banco-name">🏦 Sicredi</div>
+            <div class="banco-row"><span class="lbl">Receita</span><span class="v pos">R$ 1.305.460</span></div>
+            <div class="banco-row"><span class="lbl">Custos</span><span class="v neg">-R$ 10.800</span></div>
+            <div class="banco-row"><span class="lbl">Lucro Bruto</span><span class="v">R$ 1.294.660</span></div>
+            <div class="banco-row"><span class="lbl">Desp. Operac.</span><span class="v neg">-R$ 329</span></div>
+            <div class="banco-row"><span class="lbl">Desp. Financ.</span><span class="v neg">-R$ 4.195*</span></div>
+            <div class="banco-row"><span class="lbl">★ Resultado</span><span class="v neg">-R$ 55.024</span></div>
+          </div>
+        </div>
+        <div style="padding:10px 16px;font-size:10px;color:var(--muted)">* Após eliminações intercompany de R$ 1.225.000</div>
+      </div>
+    </div>
+
+    <!-- TOP DESPESAS -->
+    <div class="card" style="animation-delay:0.35s">
+      <div class="card-header">
+        <div class="card-title">Top 10 Despesas Operacionais</div>
+      </div>
+      <div class="card-body">
+        <div class="desp-list">
+          <div class="desp-row">
+            <div class="desp-rank">01</div>
+            <div class="desp-name">Folha de Pagamento</div>
+            <div class="desp-bar-wrap"><div class="desp-bar" style="width:100%"></div></div>
+            <div class="desp-val">R$ 222.435</div>
+            <div class="desp-pct">17,0%</div>
+          </div>
+          <div class="desp-row">
+            <div class="desp-rank">02</div>
+            <div class="desp-name">Abat. Contrato Mútuo</div>
+            <div class="desp-bar-wrap"><div class="desp-bar" style="width:45%"></div></div>
+            <div class="desp-val">R$ 100.000</div>
+            <div class="desp-pct">7,8%</div>
+          </div>
+          <div class="desp-row">
+            <div class="desp-rank">03</div>
+            <div class="desp-name">Distribuição de Lucro</div>
+            <div class="desp-bar-wrap"><div class="desp-bar" style="width:45%"></div></div>
+            <div class="desp-val">R$ 100.000</div>
+            <div class="desp-pct">7,8%</div>
+          </div>
+          <div class="desp-row">
+            <div class="desp-rank">04</div>
+            <div class="desp-name">Impostos (ICMS/SEFAZ)</div>
+            <div class="desp-bar-wrap"><div class="desp-bar" style="width:27%"></div></div>
+            <div class="desp-val">R$ 59.150</div>
+            <div class="desp-pct">4,5%</div>
+          </div>
+          <div class="desp-row">
+            <div class="desp-rank">05</div>
+            <div class="desp-name">Pró-labore / Sócios</div>
+            <div class="desp-bar-wrap"><div class="desp-bar" style="width:23%"></div></div>
+            <div class="desp-val">R$ 52.649</div>
+            <div class="desp-pct">4,0%</div>
+          </div>
+          <div class="desp-row">
+            <div class="desp-rank">06</div>
+            <div class="desp-name">Aluguel de Veículos</div>
+            <div class="desp-bar-wrap"><div class="desp-bar" style="width:23%"></div></div>
+            <div class="desp-val">R$ 50.722</div>
+            <div class="desp-pct">3,9%</div>
+          </div>
+          <div class="desp-row">
+            <div class="desp-rank">07</div>
+            <div class="desp-name">Serviços e Consultorias</div>
+            <div class="desp-bar-wrap"><div class="desp-bar" style="width:8%"></div></div>
+            <div class="desp-val">R$ 18.704</div>
+            <div class="desp-pct">1,4%</div>
+          </div>
+          <div class="desp-row">
+            <div class="desp-rank">08</div>
+            <div class="desp-name">Software e Tecnologia</div>
+            <div class="desp-bar-wrap"><div class="desp-bar" style="width:8%"></div></div>
+            <div class="desp-val">R$ 19.953</div>
+            <div class="desp-pct">1,5%</div>
+          </div>
+          <div class="desp-row">
+            <div class="desp-rank">09</div>
+            <div class="desp-name">Plano de Saúde (Unimed)</div>
+            <div class="desp-bar-wrap"><div class="desp-bar" style="width:8%"></div></div>
+            <div class="desp-val">R$ 18.576</div>
+            <div class="desp-pct">1,4%</div>
+          </div>
+          <div class="desp-row">
+            <div class="desp-rank">10</div>
+            <div class="desp-name">Segurança e Limpeza</div>
+            <div class="desp-bar-wrap"><div class="desp-bar" style="width:7%"></div></div>
+            <div class="desp-val">R$ 16.239</div>
+            <div class="desp-pct">1,2%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CUSTOS DOS SERVIÇOS -->
+    <div class="card" style="animation-delay:0.4s">
+      <div class="card-header">
+        <div class="card-title">Composição dos Custos</div>
+      </div>
+      <div class="card-body">
+        <div style="padding:4px 0">
+          <div class="custo-row">
+            <div class="custo-name">Equipamentos e Materiais</div>
+            <div class="custo-bar-wrap"><div class="custo-bar" style="width:51.8%;background:#f59e0b"></div></div>
+            <div class="custo-val">R$ 114.517,46</div>
+            <div class="custo-pct">51,8%</div>
+          </div>
+          <div class="custo-row">
+            <div class="custo-name">Serviços de Infraestrutura</div>
+            <div class="custo-bar-wrap"><div class="custo-bar" style="width:8.0%;background:var(--accent2)"></div></div>
+            <div class="custo-val">R$ 17.595,04</div>
+            <div class="custo-pct">8,0%</div>
+          </div>
+          <div class="custo-row">
+            <div class="custo-name">Links / Telecom</div>
+            <div class="custo-bar-wrap"><div class="custo-bar" style="width:9.7%;background:var(--accent)"></div></div>
+            <div class="custo-val">R$ 21.497,38</div>
+            <div class="custo-pct">9,7%</div>
+          </div>
+          <div class="custo-row">
+            <div class="custo-name">Energia Elétrica</div>
+            <div class="custo-bar-wrap"><div class="custo-bar" style="width:3.7%;background:#a855f7"></div></div>
+            <div class="custo-val">R$ 6.434,31</div>
+            <div class="custo-pct">2,9%</div>
+          </div>
+          <div class="custo-row">
+            <div class="custo-name">SVA (Valor Adicionado)</div>
+            <div class="custo-bar-wrap"><div class="custo-bar" style="width:10.1%;background:#a855f7"></div></div>
+            <div class="custo-val">R$ 22.390,27</div>
+            <div class="custo-pct">10,1%</div>
+          </div>
+          <div class="custo-row" style="background:rgba(0,212,170,0.04);border-top:1px solid rgba(0,212,170,0.15)">
+            <div class="custo-name" style="font-family:'Syne',sans-serif;font-weight:700;color:var(--text)">TOTAL CUSTOS</div>
+            <div class="custo-bar-wrap"></div>
+            <div class="custo-val" style="font-family:'Syne',sans-serif;font-weight:700;color:var(--danger)">R$ 221.153,93</div>
+            <div class="custo-pct" style="color:var(--danger)">100%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  Dashboard gerado automaticamente &nbsp;·&nbsp; Dados consolidados Santander + Sicredi &nbsp;·&nbsp; Março 2026 &nbsp;·&nbsp; SIM.DIGITAL — REDEMETRO TELECOMUNICAÇÕES LTDA
+</footer>
+
+</body>
+</html>
