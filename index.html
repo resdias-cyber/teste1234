@@ -55,18 +55,44 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg-deep);color:var(--t
 .login-error{background:var(--danger-dim);border:1px solid rgba(232,72,85,0.3);border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;color:var(--danger);margin-top:12px;display:none;}
 
 /* ══ PORTAL TUTOR (acesso via QR) ══ */
-#portalScreen{min-height:100vh;display:none;align-items:center;justify-content:center;
+#portalScreen{min-height:100vh;display:none;flex-direction:column;align-items:center;
   background:radial-gradient(ellipse at 60% 30%,rgba(60,71,58,0.30) 0%,transparent 55%),#1a1d1a;}
-.portal-wrap{width:100%;max-width:980px;padding:24px;}
-.portal-topbar{display:flex;align-items:center;gap:16px;margin-bottom:28px;}
-.portal-topbar .ptb-logo{font-family:'Cinzel',serif;font-size:20px;color:var(--text-primary);}
+.portal-wrap{width:100%;max-width:1000px;padding:24px;margin:0 auto;box-sizing:border-box;}
+
+/* ── topbar do portal ── */
+.portal-topbar{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:12px 16px;margin-bottom:20px;
+  background:rgba(26,29,26,0.97);backdrop-filter:blur(12px);
+  border:1px solid var(--border);border-radius:var(--radius);
+  position:sticky;top:0;z-index:10;
+}
+.portal-topbar .ptb-logo{font-family:'Cinzel',serif;font-size:16px;color:var(--text-primary);flex-shrink:0;}
 .portal-topbar .ptb-logo span{color:var(--brand-white);opacity:0.7;}
-.portal-topbar .ptb-badge{margin-left:auto;padding:6px 16px;border-radius:50px;background:rgba(245,245,220,0.08);border:1px solid rgba(245,245,220,0.2);color:var(--brand-white);font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px;}
-.portal-banner{background:linear-gradient(135deg,rgba(60,71,58,0.4),rgba(245,245,220,0.03));border:1px solid rgba(245,245,220,0.15);border-radius:var(--radius);padding:24px 28px;margin-bottom:28px;display:flex;align-items:center;gap:20px;}
-.portal-banner .pb-icon{font-size:44px;filter:drop-shadow(0 0 12px rgba(0,200,150,0.4));}
-.portal-banner h2{font-family:'Cinzel',serif;font-size:26px;color:var(--text-primary);}
-.portal-banner p{font-size:13px;color:var(--text-muted);margin-top:4px;}
-.portal-banner .pb-status{margin-left:auto;flex-shrink:0;}
+.portal-topbar .ptb-badge{margin-left:auto;padding:4px 12px;border-radius:50px;background:rgba(245,245,220,0.08);border:1px solid rgba(245,245,220,0.2);color:var(--brand-white);font-size:11px;font-weight:600;display:flex;align-items:center;gap:6px;white-space:nowrap;}
+.portal-topbar .ptb-actions{display:flex;gap:6px;flex-shrink:0;}
+.portal-topbar .ptb-actions .btn-action{padding:7px 12px;font-size:12px;}
+
+/* ── banner nome do cavalo ── */
+.portal-banner{
+  background:linear-gradient(135deg,rgba(60,71,58,0.5),rgba(245,245,220,0.03));
+  border:1px solid rgba(245,245,220,0.15);border-radius:var(--radius);
+  padding:16px 20px;margin-bottom:16px;
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+}
+.portal-banner .pb-icon{font-size:40px;flex-shrink:0;}
+.portal-banner .pb-info{flex:1;min-width:120px;}
+.portal-banner h2{font-family:'Cinzel',serif;font-size:22px;color:var(--text-primary);word-break:break-word;}
+.portal-banner p{font-size:12px;color:var(--text-muted);margin-top:4px;word-break:break-word;}
+.portal-banner .pb-status{flex-shrink:0;}
+
+/* ── KPIs do portal ── */
+.portal-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;}
+.portal-kpis .kpi-card{padding:14px 12px;}
+.portal-kpis .kpi-value{font-size:16px!important;}
+.portal-kpis .kpi-label{font-size:11px;}
+
+/* timeline do portal — igual ao admin */
 
 /* ══ APP SHELL ══ */
 #appShell{display:none;}
@@ -297,7 +323,9 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg-deep);color:var(--t
 
   /* Portal */
   .portal-wrap{padding:16px;}
-  .portal-topbar{flex-wrap:wrap;gap:10px;padding-bottom:10px;}
+  .portal-topbar{flex-wrap:wrap;gap:8px;padding:10px 12px;}
+  .portal-topbar .ptb-badge{margin-left:0;}
+  .portal-kpis{grid-template-columns:1fr 1fr;}
 }
 
 /* ── SMARTPHONE (≤600px) ── */
@@ -341,9 +369,17 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg-deep);color:var(--t
   .qr-grid{grid-template-columns:1fr;}
 
   /* Portal */
-  .portal-wrap{padding:12px;}
-  .portal-banner{flex-direction:column;text-align:center;padding:16px;}
-  .portal-banner .pb-status{margin-left:0;}
+  .portal-wrap{padding:10px;}
+  .portal-topbar{padding:8px 10px;}
+  .portal-topbar img{height:34px!important;}
+  .portal-topbar .ptb-badge{display:none;}
+  .portal-topbar .ptb-actions .btn-action{padding:6px 10px;font-size:11px;}
+  .portal-banner{flex-direction:column;text-align:center;padding:14px 12px;}
+  .portal-banner .pb-icon{font-size:36px;}
+  .portal-banner h2{font-size:18px;}
+  .portal-banner .pb-status{margin-left:0;margin-top:8px;}
+  .portal-kpis{grid-template-columns:1fr 1fr;gap:8px;}
+  .portal-kpis .kpi-card{padding:10px;}
 
   /* Seção de senhas */
   .pwd-table{font-size:12px;}
@@ -359,6 +395,10 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg-deep);color:var(--t
   .kpi-value{font-size:22px;}
   .patient-name{font-size:16px;}
   .section-title{font-size:18px;}
+  .portal-kpis{grid-template-columns:1fr 1fr;}
+  .portal-banner h2{font-size:16px;}
+  .tl-item{gap:10px;}
+  .tl-dot{width:32px;height:32px;font-size:14px;}
 }
 </style>
 </head>
@@ -549,7 +589,7 @@ function renderPortal(name){
   document.getElementById('portalContent').innerHTML=`
     <div class="portal-banner">
       <div class="pb-icon">${emoji}</div>
-      <div>
+      <div class="pb-info">
         <h2>${name}</h2>
         <p>👤 Tutor: <strong style="color:var(--text-primary)">${last.tutor||'—'}</strong> &nbsp;·&nbsp; Prontuário atualizado pela clínica</p>
       </div>
@@ -557,11 +597,11 @@ function renderPortal(name){
         <span class="status-badge ${status}"><span class="status-dot live-dot"></span>${getStatusLabel(status)}</span>
       </div>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px">
-      <div class="kpi-card" style="--kpi-color:var(--accent)"><div class="kpi-icon">🎂</div><div class="kpi-label">Idade</div><div class="kpi-value" style="font-size:20px">${last.idade}</div></div>
-      <div class="kpi-card" style="--kpi-color:var(--accent)"><div class="kpi-icon">⚥</div><div class="kpi-label">Sexo</div><div class="kpi-value" style="font-size:20px">${last.sexo}</div></div>
-      <div class="kpi-card" style="--kpi-color:var(--fc-color)"><div class="kpi-icon">❤️</div><div class="kpi-label">Última FC</div><div class="kpi-value" style="font-size:20px;color:var(--fc-color)">${last.fc||'—'}</div></div>
-      <div class="kpi-card" style="--kpi-color:var(--gold)"><div class="kpi-icon">👤</div><div class="kpi-label">Tutor</div><div class="kpi-value" style="font-size:20px;color:var(--gold)">${last.tutor||'—'}</div></div>
+    <div class="portal-kpis">
+      <div class="kpi-card" style="--kpi-color:var(--accent)"><div class="kpi-label">Idade</div><div class="kpi-value" style="font-size:18px">${last.idade}</div></div>
+      <div class="kpi-card" style="--kpi-color:var(--accent)"><div class="kpi-label">Sexo</div><div class="kpi-value" style="font-size:18px">${last.sexo}</div></div>
+      <div class="kpi-card" style="--kpi-color:var(--fc-color)"><div class="kpi-label">Última FC</div><div class="kpi-value" style="font-size:16px;color:var(--fc-color)">${last.fc||'—'}</div></div>
+      <div class="kpi-card" style="--kpi-color:var(--gold)"><div class="kpi-label">Última FR</div><div class="kpi-value" style="font-size:16px;color:var(--fr-color)">${last.fr||'—'}</div></div>
     </div>
     <div class="timeline-card">
       <div class="timeline-title">🐴 Histórico Clínico — Linha do Tempo</div>
@@ -1005,42 +1045,6 @@ function checkMobile(){
 
 // Close modal on backdrop click
 document.getElementById('qrModal').addEventListener('click',function(e){if(e.target===this)closeQR();});
-
-// ═══════════════════════════════════════════════
-//  SIDEBAR TOGGLE (mobile)
-// ═══════════════════════════════════════════════
-function toggleSidebar(){
-  const sb=document.getElementById('sidebar');
-  const ov=document.getElementById('sidebarOverlay');
-  const isOpen=sb.classList.contains('open');
-  sb.classList.toggle('open',!isOpen);
-  ov.classList.toggle('active',!isOpen);
-}
-
-function checkMobile(){
-  const isMobile=window.innerWidth<=900;
-  const btn=document.getElementById('menuToggle');
-  if(btn) btn.style.display=isMobile?'flex':'none';
-  if(!isMobile){
-    document.getElementById('sidebar').classList.remove('open');
-    document.getElementById('sidebarOverlay').classList.remove('active');
-  }
-}
-
-window.addEventListener('resize',checkMobile);
-window.addEventListener('load',checkMobile);
-
-// Fechar sidebar ao clicar em item de menu no mobile
-document.addEventListener('DOMContentLoaded',function(){
-  document.querySelectorAll('.nav-item').forEach(function(item){
-    item.addEventListener('click',function(){
-      if(window.innerWidth<=900){
-        document.getElementById('sidebar').classList.remove('open');
-        document.getElementById('sidebarOverlay').classList.remove('active');
-      }
-    });
-  });
-});
 </script>
 </body>
 </html>
