@@ -190,13 +190,13 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg-deep);color:var(--t
 .chart-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;}
 .chart-title{font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--text-secondary);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
 .chart-dot{width:8px;height:8px;border-radius:50%;}
-.timeline-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:28px;margin-bottom:24px;}
+.timeline-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:28px;margin-bottom:24px;overflow:visible;}
 .timeline-title{font-family:'Cinzel',serif;font-size:20px;margin-bottom:24px;color:var(--text-primary);}
 .timeline{position:relative;}
 .timeline::before{content:'';position:absolute;left:20px;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,rgba(245,245,220,0.4),transparent);}
-.tl-item{display:flex;gap:20px;padding-bottom:28px;position:relative;}
+.tl-item{display:flex;gap:20px;padding-bottom:28px;position:relative;min-width:0;}
 .tl-dot{width:42px;height:42px;border-radius:50%;background:var(--bg-surface);border:2px solid rgba(245,245,220,0.35);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;z-index:1;box-shadow:0 0 12px rgba(245,245,220,0.08);}
-.tl-body{flex:1;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px 20px;transition:border-color .2s;}
+.tl-body{flex:1;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px 20px;transition:border-color .2s;min-width:0;word-break:break-word;}
 .tl-body:hover{border-color:var(--border-light);}
 .tl-date{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--brand-white);opacity:0.7;margin-bottom:10px;letter-spacing:0.05em;}
 .tl-vitals{display:flex;gap:16px;margin-bottom:12px;flex-wrap:wrap;}
@@ -205,20 +205,20 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg-deep);color:var(--t
 .vital-chip .vk{color:var(--text-muted);font-size:11px;}
 .vital-chip.fc .vl{color:var(--fc-color);}
 .vital-chip.fr .vl{color:var(--fr-color);}
-.tl-section{margin-top:10px;border-radius:var(--radius-sm);padding:10px 14px;}
+.tl-section{margin-top:10px;border-radius:var(--radius-sm);padding:10px 14px;min-width:0;}
 .tl-section.ortopedico{background:rgba(168,200,144,0.08);border:1px solid rgba(168,200,144,0.2);}
 .tl-section.recomendacoes{background:rgba(245,245,220,0.06);border:1px solid rgba(245,245,220,0.15);}
 .tl-section.manutencao{background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.25);}
 .tl-section.medicacoes{background:rgba(232,72,85,0.07);border:1px solid rgba(232,72,85,0.22);}
 .tl-section.exames{background:rgba(201,168,76,0.07);border:1px solid rgba(201,168,76,0.25);}
-.tl-section-body{}
+.tl-section-body{min-width:0;flex:1;}
 .tl-section-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;margin-bottom:4px;}
 .tl-section.ortopedico .tl-section-label{color:#a8c890;}
 .tl-section.recomendacoes .tl-section-label{color:var(--brand-white);}
 .tl-section.manutencao .tl-section-label{color:var(--warn);}
 .tl-section.medicacoes .tl-section-label{color:var(--danger);}
 .tl-section.exames .tl-section-label{color:var(--gold);}
-.tl-section-text{font-size:13px;color:var(--text-primary);line-height:1.6;font-weight:500;}
+.tl-section-text{font-size:13px;color:var(--text-primary);line-height:1.7;font-weight:500;word-break:break-word;white-space:pre-wrap;overflow-wrap:anywhere;}
 
 /* ══ EMPTY ══ */
 .empty-state{text-align:center;padding:80px 20px;color:var(--text-muted);}
@@ -242,22 +242,128 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg-deep);color:var(--t
   #sidebar,#topbar,.back-btn,.topbar-actions,.sidebar-bottom,.patient-qr-chip,#loginScreen,#qrModal,#portalScreen .portal-topbar{display:none!important;}
   #main,#portalScreen{margin-left:0;}#content{padding:0;}
 }
+
+/* ── TABLET (≤1024px) ── */
+@media(max-width:1024px){
+  :root{--sidebar-w:240px;}
+  .kpi-row{grid-template-columns:1fr 1fr;}
+  #patientGrid{grid-template-columns:repeat(auto-fill,minmax(260px,1fr));}
+}
+
+/* ── MOBILE/TABLET (≤900px) ── */
 @media(max-width:900px){
   :root{--sidebar-w:0px;}
-  #sidebar{transform:translateX(-260px);}#sidebar.open{transform:translateX(0);width:260px;}
+
+  /* Sidebar escondida por padrão, desliza quando .open */
+  #sidebar{transform:translateX(-280px);width:280px;z-index:200;}
+  #sidebar.open{transform:translateX(0);}
+
+  /* Overlay escuro quando sidebar aberta */
+  #sidebarOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:150;backdrop-filter:blur(2px);}
+  #sidebarOverlay.active{display:block;}
+
   #main{margin-left:0;}
-  .kpi-row{grid-template-columns:1fr 1fr;}
+
+  /* Topbar mobile */
+  #topbar{padding:0 16px;height:56px;gap:12px;}
+  #menuToggle{display:flex!important;align-items:center;justify-content:center;
+    width:38px;height:38px;border-radius:var(--radius-sm);
+    background:rgba(245,245,220,0.08);border:1px solid rgba(245,245,220,0.15);
+    color:var(--brand-white);font-size:18px;cursor:pointer;flex-shrink:0;transition:all .2s;}
+  #menuToggle:hover{background:rgba(245,245,220,0.14);}
+  .topbar-title{font-size:16px;}
+  .search-wrap{display:none!important;}
+  .topbar-actions .btn-action span{display:none;}
+  .topbar-actions{gap:8px;}
+  .btn-action{padding:8px 12px;font-size:12px;}
+
+  /* Content */
+  #content{padding:16px;}
+  .kpi-row{grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
+  .kpi-card{padding:16px;}
+  .kpi-value{font-size:26px;}
   .charts-row{grid-template-columns:1fr;}
+  #patientGrid{grid-template-columns:1fr 1fr;gap:12px;}
+  .patient-card{padding:16px;}
+
+  /* Login */
+  .login-wrap{padding:16px;}
+  .login-card{padding:24px 20px;}
+
+  /* Prontuário */
+  .prontuario-header{padding:20px;gap:16px;}
+  .prontuario-info h2{font-size:22px;}
+  .prontuario-info .meta-row{gap:12px;}
+
+  /* Portal */
+  .portal-wrap{padding:16px;}
+  .portal-topbar{flex-wrap:wrap;gap:10px;padding-bottom:10px;}
 }
+
+/* ── SMARTPHONE (≤600px) ── */
 @media(max-width:600px){
-  .kpi-row{grid-template-columns:1fr;}#content{padding:16px;}#topbar{padding:0 16px;}
-  #searchInput{width:160px;}.portal-wrap{padding:16px;}
+  /* KPI em coluna única */
+  .kpi-row{grid-template-columns:1fr;gap:10px;}
+
+  /* Cards em coluna única */
+  #patientGrid{grid-template-columns:1fr;}
+  .patient-card{padding:16px 14px;}
+
+  /* Content */
+  #content{padding:12px;}
+
+  /* Topbar */
+  #topbar{padding:0 12px;height:52px;}
+  .topbar-title{font-size:14px;}
+  .btn-action{padding:7px 10px;font-size:11px;}
+
+  /* Login */
+  .login-wrap{padding:12px;}
+  .login-logo img{width:260px!important;}
+  .login-card{padding:20px 16px;border-radius:var(--radius-sm);}
+  .login-card h2{font-size:16px;}
+
+  /* Prontuário */
+  .prontuario-header{flex-direction:column;text-align:center;padding:16px;}
+  .prontuario-info .meta-row{justify-content:center;flex-wrap:wrap;gap:8px;}
+  .prontuario-avatar{width:64px;height:64px;font-size:32px;}
+  .prontuario-info h2{font-size:20px;}
+
+  /* Timeline */
+  .tl-body{padding:12px 14px;}
+  .tl-vitals{gap:8px;}
+  .vital-chip{padding:5px 10px;}
+
+  /* Botões ação no prontuário */
+  .prontuario-header > div:last-child{margin-left:0!important;justify-content:center;width:100%;}
+
+  /* QR grid */
+  .qr-grid{grid-template-columns:1fr;}
+
+  /* Portal */
+  .portal-wrap{padding:12px;}
+  .portal-banner{flex-direction:column;text-align:center;padding:16px;}
+  .portal-banner .pb-status{margin-left:0;}
+
+  /* Seção de senhas */
+  .pwd-table{font-size:12px;}
+  .pwd-table td,.pwd-table th{padding:8px 10px;}
+  .pwd-table th:nth-child(4),.pwd-table td:nth-child(4){display:none;}
+
+  /* QR modal */
+  .qr-box{padding:24px 20px;margin:12px;}
+}
+
+/* ── VERY SMALL (≤380px) ── */
+@media(max-width:380px){
+  .kpi-value{font-size:22px;}
+  .patient-name{font-size:16px;}
+  .section-title{font-size:18px;}
 }
 </style>
 </head>
 <body>
-
-<!-- ══════════ LOGIN (admin) ══════════ -->
+<div id="sidebarOverlay" onclick="toggleSidebar()"></div>
 <div id="loginScreen">
   <div class="login-wrap">
     <div class="login-logo">
@@ -332,13 +438,16 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg-deep);color:var(--t
     <div class="sidebar-bottom">
       <input type="file" id="fileInput" accept=".xlsx,.xls" onchange="loadFile(event)">
       <button class="btn-import" onclick="document.getElementById('fileInput').click()">🐴 Importar Planilha</button>
+      <button class="btn-import" style="background:rgba(245,245,220,0.10);border-color:rgba(245,245,220,0.3)" onclick="exportHTML()">💾 Salvar HTML</button>
+      <button style="width:100%;padding:8px;background:transparent;border:1px solid rgba(245,245,220,0.1);border-radius:var(--radius-sm);color:var(--text-muted);font-family:'Montserrat',sans-serif;font-size:11px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px;" onmouseover="this.style.borderColor='rgba(192,72,72,0.4)';this.style.color='#c04848'" onmouseout="this.style.borderColor='rgba(245,245,220,0.1)';this.style.color='var(--text-muted)'" onclick="clearStorage()">🗑 Limpar dados salvos</button>
       <button class="btn-logout" onclick="doLogout()">← Sair</button>
     </div>
   </aside>
 
   <div id="main">
     <header id="topbar">
-      <div style="display:flex;align-items:center;gap:16px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <button id="menuToggle" style="display:none" onclick="toggleSidebar()" aria-label="Menu">☰</button>
         <div class="topbar-title" id="topbarTitle">Dashboard <span>Clínico</span></div>
       </div>
       <div class="search-wrap">
@@ -415,16 +524,13 @@ let activeQrName='', activeQrUrl='';
 window.addEventListener('load', ()=>{
   const params = new URLSearchParams(window.location.search);
   const cavalo = params.get('cavalo');
-  loadDemo(); // always load data first
+  // Tenta carregar do localStorage primeiro, senão usa demo
+  const saved = loadFromStorage();
+  if(!saved) loadDemo();
   if(cavalo){
-    // Portal do tutor — sem login
     const name = decodeURIComponent(cavalo).toUpperCase();
-    if(patients[name]){
-      showPortal(name);
-    } else {
-      // data may not be loaded yet — handled via loadDemo callback
-      window._pendingPortal = name;
-    }
+    if(patients[name]){ showPortal(name); }
+    else { window._pendingPortal = name; }
   }
 });
 
@@ -611,6 +717,7 @@ function parseData(raw){
   renderDashboard(); renderPatientList(); renderQRGrid();
   document.getElementById('empty-dashboard').style.display='none';
   document.getElementById('loaded-dashboard').style.display='block';
+  saveToStorage(); // salva automaticamente no navegador
   // Handle pending portal (deep link loaded before data)
   if(window._pendingPortal){
     const name=window._pendingPortal; window._pendingPortal=null;
@@ -822,8 +929,118 @@ function loadDemo(){
   ]);
 }
 
+// ═══════════════════════════════════════════════
+//  LOCALSTORAGE — salva e recupera dados
+// ═══════════════════════════════════════════════
+const LS_KEY = 'equivet_dados_v1';
+
+function saveToStorage(){
+  try{
+    localStorage.setItem(LS_KEY, JSON.stringify(allData));
+  } catch(e){ console.warn('localStorage indisponível'); }
+}
+
+function loadFromStorage(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if(!raw) return false;
+    const data = JSON.parse(raw);
+    if(!data || !data.length) return false;
+    parseData(data);
+    showToast('✓ Dados restaurados do último acesso');
+    return true;
+  } catch(e){ return false; }
+}
+
+function clearStorage(){
+  if(!confirm('Apagar os dados salvos e voltar para os dados de demonstração?')) return;
+  localStorage.removeItem(LS_KEY);
+  loadDemo();
+  showToast('Dados apagados — exibindo demonstração');
+}
+
+// ═══════════════════════════════════════════════
+//  EXPORTAR HTML com dados embutidos
+// ═══════════════════════════════════════════════
+function exportHTML(){
+  showToast('Preparando arquivo...');
+  const doctype = '<!DOCTYPE html>';
+  let src = document.documentElement.outerHTML;
+  // Substitui loadDemo pelo array de dados atual
+  const dataJson = JSON.stringify(allData);
+  src = src.replace(
+    /function loadDemo\(\)\{[\s\S]*?\n\}/,
+    'function loadDemo(){\n  parseData(' + dataJson + ');\n}'
+  );
+  const blob = new Blob([doctype + src], {type:'text/html;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'Eduardo Soares Medicina Equina.html';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  setTimeout(()=>showToast('✓ HTML exportado com dados incluídos!'), 500);
+}
+
+// ═══════════════════════════════════════════════
+//  SIDEBAR TOGGLE (mobile)
+// ═══════════════════════════════════════════════
+function toggleSidebar(){
+  const sb=document.getElementById('sidebar');
+  const ov=document.getElementById('sidebarOverlay');
+  const isOpen=sb.classList.contains('open');
+  sb.classList.toggle('open',!isOpen);
+  ov.classList.toggle('active',!isOpen);
+}
+
+function checkMobile(){
+  const isMobile=window.innerWidth<=900;
+  const btn=document.getElementById('menuToggle');
+  if(btn) btn.style.display=isMobile?'flex':'none';
+  // Close sidebar when resizing to desktop
+  if(!isMobile){
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('active');
+  }
+}
+
 // Close modal on backdrop click
 document.getElementById('qrModal').addEventListener('click',function(e){if(e.target===this)closeQR();});
+
+// ═══════════════════════════════════════════════
+//  SIDEBAR TOGGLE (mobile)
+// ═══════════════════════════════════════════════
+function toggleSidebar(){
+  const sb=document.getElementById('sidebar');
+  const ov=document.getElementById('sidebarOverlay');
+  const isOpen=sb.classList.contains('open');
+  sb.classList.toggle('open',!isOpen);
+  ov.classList.toggle('active',!isOpen);
+}
+
+function checkMobile(){
+  const isMobile=window.innerWidth<=900;
+  const btn=document.getElementById('menuToggle');
+  if(btn) btn.style.display=isMobile?'flex':'none';
+  if(!isMobile){
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('active');
+  }
+}
+
+window.addEventListener('resize',checkMobile);
+window.addEventListener('load',checkMobile);
+
+// Fechar sidebar ao clicar em item de menu no mobile
+document.addEventListener('DOMContentLoaded',function(){
+  document.querySelectorAll('.nav-item').forEach(function(item){
+    item.addEventListener('click',function(){
+      if(window.innerWidth<=900){
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('active');
+      }
+    });
+  });
+});
 </script>
 </body>
 </html>
