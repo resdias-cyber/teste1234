@@ -54,6 +54,25 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg-deep);color:var(--t
 .login-hint strong{color:var(--brand-white);font-family:'JetBrains Mono',monospace;}
 .login-error{background:var(--danger-dim);border:1px solid rgba(232,72,85,0.3);border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;color:var(--danger);margin-top:12px;display:none;}
 
+/* ── VACINAÇÃO ── */
+.vaccine-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:50px;font-size:11px;font-weight:700;letter-spacing:0.04em;}
+.vaccine-badge.ok{background:rgba(60,71,58,0.5);color:#a8d8a0;border:1px solid rgba(168,216,160,0.3);}
+.vaccine-badge.alerta{background:rgba(200,168,74,0.15);color:#c8a84a;border:1px solid rgba(200,168,74,0.4);}
+.vaccine-badge.vencida{background:rgba(192,72,72,0.15);color:#e07070;border:1px solid rgba(192,72,72,0.4);}
+.vaccine-badge.sem-data{background:rgba(245,245,220,0.06);color:var(--text-muted);border:1px solid rgba(245,245,220,0.1);}
+.vaccine-alert-bar{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:var(--radius-sm);margin-bottom:10px;font-size:12px;font-weight:600;}
+.vaccine-alert-bar.vencida{background:rgba(192,72,72,0.12);border:1px solid rgba(192,72,72,0.35);color:#e07070;}
+.vaccine-alert-bar.alerta{background:rgba(200,168,74,0.10);border:1px solid rgba(200,168,74,0.35);color:#c8a84a;}
+.vaccine-card{margin-top:10px;border-radius:var(--radius-sm);padding:12px 14px;}
+.vaccine-card.ok{background:rgba(60,71,58,0.3);border:1px solid rgba(168,216,160,0.2);}
+.vaccine-card.alerta{background:rgba(200,168,74,0.08);border:1px solid rgba(200,168,74,0.3);}
+.vaccine-card.vencida{background:rgba(192,72,72,0.08);border:1px solid rgba(192,72,72,0.3);}
+.vaccine-card.sem-data{background:rgba(245,245,220,0.04);border:1px solid rgba(245,245,220,0.1);}
+.vaccine-card .vc-label{font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px;color:var(--text-muted);}
+.vaccine-card .vc-row{display:flex;gap:16px;flex-wrap:wrap;align-items:center;}
+.vaccine-card .vc-item{font-size:12px;color:var(--text-secondary);}
+.vaccine-card .vc-item strong{color:var(--text-primary);}
+
 /* ══ PORTAL TUTOR (acesso via QR) ══ */
 #portalScreen{min-height:100vh;display:none;flex-direction:column;align-items:center;
   background:radial-gradient(ellipse at 60% 30%,rgba(60,71,58,0.30) 0%,transparent 55%),#1a1d1a;}
@@ -151,7 +170,7 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg-deep);color:var(--t
 
 /* ══ PATIENT CARD ══ */
 #patientGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;}
-.patient-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
+.patient-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:20px 20px 52px 20px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
 .patient-card:hover{border-color:rgba(245,245,220,0.3);transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,0.5);}
 .patient-card::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(245,245,220,0.04) 0%,transparent 60%);opacity:0;transition:opacity .2s;pointer-events:none;}
 .patient-card:hover::after{opacity:1;}
@@ -584,9 +603,13 @@ function showPortal(name){
 function renderPortal(name){
   const records=patients[name];
   if(!records){ document.getElementById('portalContent').innerHTML='<div class="empty-state"><div class="empty-icon">🐴</div><h3>Cavalo não encontrado</h3><p>Verifique o link com a clínica.</p></div>'; return; }
-  const last=records[0], status=getStatus(parseFC(last.fc),parseFC(last.fr)), emoji=getAnimalEmoji(name);
+  const last=records[0], status='stable', emoji=getAnimalEmoji(name);
+  // vacinação mais recente com data
+  const vacRec=records.find(r=>r.vaccine&&r.vaccine.status!=='sem-data');
+  const vac=vacRec?vacRec.vaccine:null;
 
   document.getElementById('portalContent').innerHTML=`
+    ${vac?vaccineAlertBar(vac):''}
     <div class="portal-banner">
       <div class="pb-icon">${emoji}</div>
       <div class="pb-info">
@@ -600,9 +623,10 @@ function renderPortal(name){
     <div class="portal-kpis">
       <div class="kpi-card" style="--kpi-color:var(--accent)"><div class="kpi-label">Idade</div><div class="kpi-value" style="font-size:18px">${last.idade}</div></div>
       <div class="kpi-card" style="--kpi-color:var(--accent)"><div class="kpi-label">Sexo</div><div class="kpi-value" style="font-size:18px">${last.sexo}</div></div>
-      <div class="kpi-card" style="--kpi-color:var(--fc-color)"><div class="kpi-label">Última FC</div><div class="kpi-value" style="font-size:16px;color:var(--fc-color)">${last.fc||'—'}</div></div>
-      <div class="kpi-card" style="--kpi-color:var(--gold)"><div class="kpi-label">Última FR</div><div class="kpi-value" style="font-size:16px;color:var(--fr-color)">${last.fr||'—'}</div></div>
+      <div class="kpi-card" style="--kpi-color:var(--accent)"><div class="kpi-label">Última Consulta</div><div class="kpi-value" style="font-size:13px">${last.data}</div></div>
+      <div class="kpi-card" style="--kpi-color:var(--gold)"><div class="kpi-label">Vacinação</div><div class="kpi-value" style="font-size:13px;color:${vac?{ok:'#a8d8a0',alerta:'var(--warn)',vencida:'var(--danger)'}[vac.status]:'var(--text-muted)'}">${vac?vac.label:'Sem registro'}</div></div>
     </div>
+    ${vac?`<div style="margin-bottom:16px">${vaccineBlock(vac)}</div>`:''}
     <div class="timeline-card">
       <div class="timeline-title">🐴 Histórico Clínico — Linha do Tempo</div>
       <div class="timeline">
@@ -610,15 +634,13 @@ function renderPortal(name){
           <div class="tl-dot">${i===0?'🩺':'🐴'}</div>
           <div class="tl-body">
             <div class="tl-date">${i===0?'🔴 ÚLTIMA CONSULTA — ':''}${r.data}</div>
-            <div class="tl-vitals">
-              <div class="vital-chip fc"><div class="vl">${r.fc||'—'}</div><div class="vk">Freq. Cardíaca</div></div>
-              <div class="vital-chip fr"><div class="vl">${r.fr||'—'}</div><div class="vk">Freq. Respiratória</div></div>
-            </div>
             ${r.ortopedico?`<div class="tl-section ortopedico"><div class="tl-section-body"><div class="tl-section-label">Exame Ortopédico</div><div class="tl-section-text">${r.ortopedico}</div></div></div>`:''}
             ${r.recomendacoes?`<div class="tl-section recomendacoes"><div class="tl-section-body"><div class="tl-section-label">Recomendações</div><div class="tl-section-text">${r.recomendacoes}</div></div></div>`:''}
-            ${r.medicacoes?`<div class="tl-section medicacoes"><div class="tl-section-body"><div class="tl-section-label">Medicações</div><div class="tl-section-text">${r.medicacoes}</div></div></div>`:''}
-            ${r.exames?`<div class="tl-section exames"><div class="tl-section-body"><div class="tl-section-label">Exames</div><div class="tl-section-text">${r.exames}</div></div></div>`:''}
+            ${r.observacoes?`<div class="tl-section medicacoes"><div class="tl-section-body"><div class="tl-section-label">Observações</div><div class="tl-section-text">${r.observacoes}</div></div></div>`:''}
+            ${r.exames?`<div class="tl-section exames"><div class="tl-section-body"><div class="tl-section-label">Exames Realizados</div><div class="tl-section-text">${r.exames}</div></div></div>`:''}
             ${r.manutencao?`<div class="tl-section manutencao"><div class="tl-section-body"><div class="tl-section-label">Manutenção</div><div class="tl-section-text">${r.manutencao}</div></div></div>`:''}
+            ${r.provas?`<div class="tl-section" style="background:rgba(138,158,114,0.08);border:1px solid rgba(138,158,114,0.2);margin-top:10px;border-radius:var(--radius-sm);padding:10px 14px"><div class="tl-section-body"><div class="tl-section-label" style="color:var(--gold)">Provas / Competições</div><div class="tl-section-text">${r.provas}</div></div></div>`:''}
+            ${r.vaccine&&r.vaccine.status!=='sem-data'?vaccineBlock(r.vaccine):''}
           </div>
         </div>`).join('')}
       </div>
@@ -628,6 +650,30 @@ function renderPortal(name){
 // ═══════════════════════════════════════════════
 //  QR CODE helpers
 // ═══════════════════════════════════════════════
+// ── Gera bloco HTML de vacinação
+function vaccineBlock(v, compact=false){
+  if(!v) return '';
+  const icons={ok:'💉',alerta:'⚠️',vencida:'🚨','sem-data':'❓'};
+  if(compact){
+    return `<span class="vaccine-badge ${v.status}">${icons[v.status]} ${v.label}</span>`;
+  }
+  return `<div class="vaccine-card ${v.status}">
+    <div class="vc-label">💉 Vacinação Anual</div>
+    <div class="vc-row">
+      ${v.data?`<div class="vc-item">Última: <strong>${v.data}</strong></div>`:''}
+      ${v.proxima?`<div class="vc-item">Próxima: <strong>${v.proxima}</strong></div>`:''}
+      <div class="vc-item"><span class="vaccine-badge ${v.status}">${icons[v.status]} ${v.label}</span></div>
+    </div>
+  </div>`;
+}
+
+// ── Gera alerta de vacinação vencida/alerta para o topo do prontuário
+function vaccineAlertBar(v){
+  if(!v||v.status==='ok'||v.status==='sem-data') return '';
+  const msgs={vencida:`🚨 Vacinação VENCIDA há ${Math.abs(v.dias)} dias — próxima dose: ${v.proxima}`, alerta:`⚠️ Vacinação vence em ${v.dias} dias — agendar próxima dose: ${v.proxima}`};
+  return `<div class="vaccine-alert-bar ${v.status}">${msgs[v.status]}</div>`;
+}
+
 function buildLink(name){
   const base = window.location.href.split('?')[0];
   return `${base}?cavalo=${encodeURIComponent(name)}`;
@@ -731,25 +777,93 @@ function loadFile(e){const f=e.target.files[0];if(f)processFile(f);e.target.valu
 function processFile(file){
   const r=new FileReader();
   r.onload=function(e){
-    try{const wb=XLSX.read(e.target.result,{type:'binary'});const ws=wb.Sheets[wb.SheetNames[0]];
-      const raw=XLSX.utils.sheet_to_json(ws,{raw:false,dateNF:'dd/mm/yyyy'});
-      parseData(raw); showToast(`${raw.length} registros carregados`);
-    }catch(err){showToast('❌ Erro ao ler o arquivo');}
+    try{
+      const wb=XLSX.read(e.target.result,{type:'binary',cellDates:true});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      // cellDates:true faz SheetJS retornar objetos Date para células de data
+      // raw:false converte o restante para string legível
+      const raw=XLSX.utils.sheet_to_json(ws,{raw:false,dateNF:'dd/mm/yyyy',defval:''});
+      // Para vacinação precisamos do valor bruto (serial ou Date) — relemos com raw:true
+      const rawNums=XLSX.utils.sheet_to_json(ws,{raw:true,defval:null});
+      // Mescla: usa strings do raw para texto, números do rawNums para datas de vacinação
+      const merged=raw.map((row,i)=>{
+        const nr=rawNums[i]||{};
+        // Detecta coluna de vacinação pelo nome (case-insensitive)
+        Object.keys(nr).forEach(k=>{
+          if(/vacina/i.test(k)) row[k]=nr[k]; // preserva serial/Date original
+        });
+        return row;
+      });
+      parseData(merged); showToast(`✓ ${merged.length} registros carregados`);
+    }catch(err){console.error(err);showToast('❌ Erro ao ler o arquivo');}
   };
   r.readAsBinaryString(file);
+}
+
+// ── Converte qualquer formato de data para Date
+function parseExcelDate(v){
+  if(!v&&v!==0) return null;
+  // Já é um objeto Date (SheetJS converte automaticamente células de data)
+  if(v instanceof Date && !isNaN(v)) return v;
+  // Serial numérico do Excel
+  if(typeof v==='number'&&v>40000){
+    return new Date(Math.round((v-25569)*86400*1000));
+  }
+  // String ISO (2025-02-14T00:00:00.000Z) ou DD/MM/YYYY
+  if(typeof v==='string'&&v.trim()){
+    // tenta parse direto (ISO)
+    const iso = new Date(v);
+    if(!isNaN(iso)) return iso;
+    // DD/MM/YYYY
+    const p=v.trim().split(/[\/\-]/);
+    if(p.length===3){
+      const d=p[0].length===4?new Date(+p[0],+p[1]-1,+p[2]):new Date(+p[2],+p[1]-1,+p[0]);
+      if(!isNaN(d))return d;
+    }
+  }
+  return null;
+}
+
+// ── Retorna status da vacinação anual
+function calcVaccineStatus(v){
+  const d=parseExcelDate(v);
+  if(!d)return{data:null,label:'Sem registro',status:'sem-data'};
+  const hoje=new Date();hoje.setHours(0,0,0,0);
+  const proxima=new Date(d);proxima.setFullYear(proxima.getFullYear()+1);
+  const dias=Math.round((proxima-hoje)/86400000);
+  const dataStr=d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const proximaStr=proxima.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
+  if(dias<0)return{data:dataStr,proxima:proximaStr,dias,label:`Vencida há ${Math.abs(dias)} dias`,status:'vencida'};
+  if(dias<=60)return{data:dataStr,proxima:proximaStr,dias,label:`Vence em ${dias} dias`,status:'alerta'};
+  return{data:dataStr,proxima:proximaStr,dias,label:`Válida — vence em ${dias} dias`,status:'ok'};
 }
 
 function parseData(raw){
   allData=raw.map(row=>{
     const n={};Object.keys(row).forEach(k=>{n[k.trim().toUpperCase()]=row[k];});
-    return{data:n['DATA']||'',nome:(n['NOME']||'').toString().trim().toUpperCase(),
-      idade:n['IDADE']||'',sexo:n['SEXO']||'',fc:n['FC']||'',fr:n['FR']||'',
-      ortopedico:n['EXAME ORTOPÉDICO']||n['EXAME ORTOPEDICO']||n['ORTOPEDICO']||'',
-      recomendacoes:n['RECOMENDAÇÕES']||n['RECOMENDACOES']||'',
+    // Busca coluna de vacinação tolerando variações de encoding
+    const vacRaw=(()=>{
+      for(const k of Object.keys(n)){
+        if(/vacina/i.test(k)) return n[k]||null;
+      }
+      return null;
+    })();
+    // DATA pode vir como objeto Date do SheetJS, serial ou string
+    const dataVal = fmtDate(n['DATA']||n['Data']||n['data']||'');
+    return{data:dataVal,nome:(n['NOME']||'').toString().trim().toUpperCase(),
+      idade:n['IDADE']||'',sexo:n['SEXO']||'',
+      ortopedico:(()=>{for(const k of Object.keys(n)){if(/ortop/i.test(k))return n[k]||'';} return '';})(),
+      recomendacoes:(()=>{for(const k of Object.keys(n)){if(/recomenda/i.test(k))return n[k]||'';} return '';})(),
       tutor:n['TUTOR']||'',
-      manutencao:n['MANUTENÇÃO']||n['MANUTENCAO']||n['OBSERVAÇÕES']||n['OBSERVACOES']||'',
-      medicacoes:n['MEDICAÇÕES']||n['MEDICACOES']||n['MEDICAMENTOS']||'',
-      exames:n['EXAMES']||''};
+      manutencao:(()=>{for(const k of Object.keys(n)){if(/manuten/i.test(k))return n[k]||'';} return '';})(),
+      observacoes:(()=>{for(const k of Object.keys(n)){if(/observa/i.test(k))return n[k]||'';} return '';})(),
+      exames:(()=>{for(const k of Object.keys(n)){if(/exame/i.test(k)&&!/ortop/i.test(k))return n[k]||'';} return '';})(),
+      provas:(()=>{for(const k of Object.keys(n)){if(/provas/i.test(k))return n[k]||'';} return '';})(),
+      mensalidade:(()=>{for(const k of Object.keys(n)){if(/mensalidade/i.test(k)){const v=parseFloat(n[k]);return isNaN(v)?0:v;}} return 0;})(),
+      extra:(()=>{for(const k of Object.keys(n)){if(/valor.?extra|extra/i.test(k)&&!/mensalidade/i.test(k)){const v=parseFloat(n[k]);return isNaN(v)?0:v;}} return 0;})(),
+      dataPagExtra:(()=>{for(const k of Object.keys(n)){if(/data.*(extra|pagamento)/i.test(k)||/(pagamento|extra).*data/i.test(k))return fmtDate(n[k])||'';} return '';})(),
+      vacRaw,
+      vaccine:calcVaccineStatus(vacRaw)};
   }).filter(r=>r.nome);
   patients={};
   allData.forEach(r=>{if(!patients[r.nome])patients[r.nome]=[];patients[r.nome].push(r);});
@@ -766,6 +880,46 @@ function parseData(raw){
 }
 
 function parseDate(str){if(!str)return 0;if(str.includes('/')){const[d,m,y]=str.split('/');return new Date(+y,+m-1,+d).getTime();}return new Date(str).getTime()||0;}
+
+// Garante formato DD/MM/AAAA para qualquer entrada de data
+function fmtDate(v){
+  if(!v) return '';
+  // Já é objeto Date
+  if(v instanceof Date && !isNaN(v))
+    return v.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
+  // Serial Excel numérico
+  if(typeof v==='number' && v>40000){
+    const d=new Date(Math.round((v-25569)*86400*1000));
+    return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
+  }
+  if(typeof v==='string' && v.trim()){
+    const s=v.trim();
+    const p=s.split('/');
+    if(p.length===3){
+      let dia,mes,ano;
+      // Ano de 2 dígitos (ex: 5/13/26) → adiciona 2000
+      ano = p[2].length<=2 ? 2000+parseInt(p[2],10) : parseInt(p[2],10);
+      // Se segundo número > 12 → formato americano M/DD/YY (mês primeiro)
+      if(parseInt(p[1],10)>12){
+        mes=parseInt(p[0],10);
+        dia=parseInt(p[1],10);
+      } else {
+        // DD/MM/AAAA — formato brasileiro
+        dia=parseInt(p[0],10);
+        mes=parseInt(p[1],10);
+      }
+      const d=new Date(ano,mes-1,dia);
+      if(!isNaN(d)) return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
+    }
+    // ISO 2026-05-13
+    if(/^\d{4}-\d{2}-\d{2}/.test(s)){
+      const d=new Date(s);
+      if(!isNaN(d)) return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
+    }
+    return s;
+  }
+  return '';
+}
 function parseFC(str){if(!str)return null;const m=str.toString().match(/^(\d+)/);return m?parseInt(m[1]):null;}
 
 // Parâmetros equinos: FC normal 28-44 bpm | FR normal 8-16 rpm
@@ -803,29 +957,49 @@ function getAnimalEmoji(nome){
 // ═══════════════════════════════════════════════
 function renderDashboard(){
   const names=Object.keys(patients),total=allData.length;
-  const stable=names.filter(n=>getStatus(parseFC(patients[n][0].fc),parseFC(patients[n][0].fr))==='stable').length;
-  const warning=names.filter(n=>getStatus(parseFC(patients[n][0].fc),parseFC(patients[n][0].fr))==='warning').length;
-  const critical=names.filter(n=>getStatus(parseFC(patients[n][0].fc),parseFC(patients[n][0].fr))==='critical').length;
+  // KPIs baseados em vacinação
+  const vacStatuses=names.map(n=>{const vr=patients[n].find(r=>r.vaccine&&r.vaccine.status!=='sem-data');return vr?vr.vaccine.status:'sem-data';});
+  const vacOk=vacStatuses.filter(s=>s==='ok').length;
+  const vacAlerta=vacStatuses.filter(s=>s==='alerta').length;
+  const vacVencida=vacStatuses.filter(s=>s==='vencida').length;
+  // KPIs financeiros
+  const totalMens = allData.reduce((s,r)=>s+(r.mensalidade||0),0);
+  const totalExtra = allData.reduce((s,r)=>s+(r.extra||0),0);
+  const totalGeral = totalMens + totalExtra;
+  const mediaCavalo = names.length ? totalGeral/names.length : 0;
+  const fmt = v => 'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
   document.getElementById('kpiRow').innerHTML=`
-    <div class="kpi-card" style="--kpi-color:var(--accent)"><div class="kpi-label">Total de Cavalos</div><div class="kpi-value">${names.length}</div><div class="kpi-sub">${total} consultas</div></div>
-    <div class="kpi-card" style="--kpi-color:var(--accent)"><div class="kpi-label">Estáveis</div><div class="kpi-value" style="color:var(--accent)">${stable}</div><div class="kpi-sub">dentro dos parâmetros</div></div>
-    <div class="kpi-card" style="--kpi-color:var(--warn)"><div class="kpi-label">Em Observação</div><div class="kpi-value" style="color:var(--warn)">${warning}</div><div class="kpi-sub">monitoramento ativo</div></div>
-    <div class="kpi-card" style="--kpi-color:var(--danger)"><div class="kpi-label">Estado Crítico</div><div class="kpi-value" style="color:var(--danger)">${critical}</div><div class="kpi-sub">atenção imediata</div></div>`;
+    <div class="kpi-card" style="--kpi-color:#a8d8a0"><div class="kpi-label">Total Recebido</div><div class="kpi-value" style="color:#a8d8a0;font-size:20px">${fmt(totalGeral)}</div><div class="kpi-sub">${total} consultas · ${names.length} cavalos</div></div>
+    <div class="kpi-card" style="--kpi-color:var(--fc-color)"><div class="kpi-label">Total Mensalidades</div><div class="kpi-value" style="color:var(--fc-color);font-size:20px">${fmt(totalMens)}</div><div class="kpi-sub">R$ ${(200).toLocaleString('pt-BR',{minimumFractionDigits:2})} por cavalo/mês</div></div>
+    <div class="kpi-card" style="--kpi-color:var(--warn)"><div class="kpi-label">Total Extras</div><div class="kpi-value" style="color:var(--warn);font-size:20px">${fmt(totalExtra)}</div><div class="kpi-sub">procedimentos e exames</div></div>
+    <div class="kpi-card" style="--kpi-color:var(--gold)"><div class="kpi-label">Média por Cavalo</div><div class="kpi-value" style="color:var(--gold);font-size:20px">${fmt(mediaCavalo)}</div><div class="kpi-sub">total ÷ ${names.length} cavalos</div></div>`;
   document.getElementById('patientCount').textContent=`${names.length} cavalo(s)`;
   renderPatientCards(names);
 }
 
 function renderPatientCards(names){
   document.getElementById('patientGrid').innerHTML=names.map(name=>{
-    const records=patients[name],last=records[0],status=getStatus(parseFC(last.fc),parseFC(last.fr)),emoji=getAnimalEmoji(name);
+    const records=patients[name],last=records[0],status='stable',emoji=getAnimalEmoji(name);
+    // pega a vacinação mais recente que tenha data
+    const vac = records.find(r=>r.vaccine&&r.vaccine.status!=='sem-data');
+    const vacBadge = vac ? vaccineBlock(vac.vaccine, true) : '';
     return`<div class="patient-card" onclick="openProntuario('${name}')">
       <div class="patient-visits">${records.length} consulta${records.length>1?'s':''}</div>
+      ${vacBadge?`<div style="position:absolute;top:44px;right:16px;z-index:2">${vacBadge}</div>`:''}
       <div class="patient-avatar">${emoji}</div>
       <div class="patient-name">${name}</div>
       <div class="patient-meta">🎂 ${last.idade} &nbsp;·&nbsp; ⚥ ${last.sexo}</div>
       <div class="patient-meta" style="margin-top:4px;font-size:12px">👤 Tutor: <strong>${last.tutor||'—'}</strong></div>
       <div class="patient-last">🗓 Última: ${last.data}</div>
-      <div><span class="status-badge ${status}"><span class="status-dot live-dot"></span>${getStatusLabel(status)}</span></div>
+      ${(()=>{
+        const tmens=patients[name].reduce((s,r)=>s+(r.mensalidade||0),0);
+        const textra=patients[name].reduce((s,r)=>s+(r.extra||0),0);
+        const fmt=v=>'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+        return tmens||textra?`<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;font-size:11px;color:var(--text-muted)">
+          <span>💰 Mens.: <strong style="color:#a8d8a0">${fmt(tmens)}</strong></span>
+          <span>➕ Extras: <strong style="color:var(--warn)">${fmt(textra)}</strong></span>
+        </div>`:'';
+      })()}
       <div class="patient-qr-chip" onclick="openQRModal('${name}',event)">📲 QR Code</div>
     </div>`;
   }).join('');
@@ -837,6 +1011,8 @@ function renderPatientList(){
   list.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px">
     ${names.map(name=>{
       const r=patients[name][0],status=getStatus(parseFC(r.fc),parseFC(r.fr)),emoji=getAnimalEmoji(name);
+      const vac=patients[name].find(x=>x.vaccine&&x.vaccine.status!=='sem-data');
+      const vacBadge=vac?vaccineBlock(vac.vaccine,true):'';
       return`<div class="patient-card" onclick="openProntuario('${name}')">
         <div class="patient-visits">${patients[name].length} consulta${patients[name].length>1?'s':''}</div>
         <div class="patient-avatar">${emoji}</div>
@@ -844,7 +1020,10 @@ function renderPatientList(){
         <div class="patient-meta">🎂 ${r.idade} &nbsp;·&nbsp; ⚥ ${r.sexo}</div>
         <div class="patient-meta" style="margin-top:4px;font-size:12px">👤 Tutor: <strong>${r.tutor||'—'}</strong></div>
         <div class="patient-last">🗓 Última: ${r.data}</div>
-        <div><span class="status-badge ${status}"><span class="status-dot"></span>${getStatusLabel(status)}</span></div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:4px">
+          <span class="status-badge ${status}"><span class="status-dot"></span>${getStatusLabel(status)}</span>
+          ${vacBadge}
+        </div>
         <div class="patient-qr-chip" onclick="openQRModal('${name}',event)">📲 QR Code</div>
       </div>`;
     }).join('')}
@@ -862,9 +1041,12 @@ function openProntuario(name){
 }
 
 function renderProntuario(name){
-  const records=patients[name],last=records[0],status=getStatus(parseFC(last.fc),parseFC(last.fr)),emoji=getAnimalEmoji(name);
+  const records=patients[name],last=records[0],status='stable',emoji=getAnimalEmoji(name);
+  const vacRec=records.find(r=>r.vaccine&&r.vaccine.status!=='sem-data');
+  const vac=vacRec?vacRec.vaccine:null;
 
   document.getElementById('prontuarioContent').innerHTML=`
+    ${vac?vaccineAlertBar(vac):''}
     <div class="prontuario-header">
       <div class="prontuario-avatar">${emoji}</div>
       <div class="prontuario-info">
@@ -874,7 +1056,7 @@ function renderProntuario(name){
           <div class="meta-chip">⚥ ${last.sexo}</div>
           <div class="meta-chip">👤 ${last.tutor||'—'}</div>
           <div class="meta-chip">🗓 ${records.length} consulta${records.length>1?'s':''}</div>
-          <div class="meta-chip"><span class="status-badge ${status}" style="margin-top:0"><span class="status-dot live-dot"></span>${getStatusLabel(status)}</span></div>
+          ${vac?`<div class="meta-chip">${vaccineBlock(vac,true)}</div>`:''}
         </div>
       </div>
       <div style="margin-left:auto;display:flex;gap:10px;flex-shrink:0;flex-wrap:wrap">
@@ -883,6 +1065,18 @@ function renderProntuario(name){
         <button class="btn-action" onclick="window.print()">🖨 Imprimir</button>
       </div>
     </div>
+    ${vac?`<div style="margin-bottom:16px">${vaccineBlock(vac)}</div>`:''}
+    ${(()=>{
+      const tmens=records.reduce((s,r)=>s+(r.mensalidade||0),0);
+      const textra=records.reduce((s,r)=>s+(r.extra||0),0);
+      const fmt=v=>'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+      if(!tmens&&!textra) return '';
+      return `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:16px">
+        <div class="kpi-card" style="--kpi-color:#a8d8a0;padding:14px"><div class="kpi-label">Total Mensalidades</div><div class="kpi-value" style="color:#a8d8a0;font-size:18px">${fmt(tmens)}</div></div>
+        <div class="kpi-card" style="--kpi-color:var(--warn);padding:14px"><div class="kpi-label">Total Extras</div><div class="kpi-value" style="color:var(--warn);font-size:18px">${fmt(textra)}</div></div>
+        <div class="kpi-card" style="--kpi-color:var(--gold);padding:14px"><div class="kpi-label">Total Geral</div><div class="kpi-value" style="color:var(--gold);font-size:18px">${fmt(tmens+textra)}</div></div>
+      </div>`;
+    })()}
     <div class="timeline-card">
       <div class="timeline-title">🐴 Histórico Clínico — Linha do Tempo</div>
       <div class="timeline">
@@ -890,15 +1084,18 @@ function renderProntuario(name){
           <div class="tl-dot">${i===0?'🩺':'🐴'}</div>
           <div class="tl-body">
             <div class="tl-date">${i===0?'🔴 ÚLTIMA CONSULTA — ':''}${r.data}</div>
-            <div class="tl-vitals">
-              <div class="vital-chip fc"><div class="vl">${r.fc||'—'}</div><div class="vk">Freq. Cardíaca</div></div>
-              <div class="vital-chip fr"><div class="vl">${r.fr||'—'}</div><div class="vk">Freq. Respiratória</div></div>
-            </div>
             ${r.ortopedico?`<div class="tl-section ortopedico"><div class="tl-section-body"><div class="tl-section-label">Exame Ortopédico</div><div class="tl-section-text">${r.ortopedico}</div></div></div>`:''}
             ${r.recomendacoes?`<div class="tl-section recomendacoes"><div class="tl-section-body"><div class="tl-section-label">Recomendações</div><div class="tl-section-text">${r.recomendacoes}</div></div></div>`:''}
-            ${r.medicacoes?`<div class="tl-section medicacoes"><div class="tl-section-body"><div class="tl-section-label">Medicações</div><div class="tl-section-text">${r.medicacoes}</div></div></div>`:''}
-            ${r.exames?`<div class="tl-section exames"><div class="tl-section-body"><div class="tl-section-label">Exames</div><div class="tl-section-text">${r.exames}</div></div></div>`:''}
+            ${r.observacoes?`<div class="tl-section medicacoes"><div class="tl-section-body"><div class="tl-section-label">Observações</div><div class="tl-section-text">${r.observacoes}</div></div></div>`:''}
+            ${r.exames?`<div class="tl-section exames"><div class="tl-section-body"><div class="tl-section-label">Exames Realizados</div><div class="tl-section-text">${r.exames}</div></div></div>`:''}
             ${r.manutencao?`<div class="tl-section manutencao"><div class="tl-section-body"><div class="tl-section-label">Manutenção</div><div class="tl-section-text">${r.manutencao}</div></div></div>`:''}
+            ${r.provas?`<div class="tl-section" style="background:rgba(138,158,114,0.08);border:1px solid rgba(138,158,114,0.25);margin-top:10px;border-radius:var(--radius-sm);padding:10px 14px"><div class="tl-section-body"><div class="tl-section-label" style="color:var(--gold)">Provas / Competições</div><div class="tl-section-text">${r.provas}</div></div></div>`:''}
+            ${r.vaccine&&r.vaccine.status!=='sem-data'?vaccineBlock(r.vaccine):''}
+            ${(r.mensalidade||r.extra)?`<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;padding:8px 12px;background:rgba(245,245,220,0.04);border:1px solid rgba(245,245,220,0.08);border-radius:var(--radius-sm)">
+              ${r.mensalidade?`<span style="font-size:12px;color:var(--text-muted)">💰 Mensalidade: <strong style="color:#a8d8a0">R$ ${r.mensalidade.toLocaleString('pt-BR',{minimumFractionDigits:2})}</strong></span>`:''}
+              ${r.extra?`<span style="font-size:12px;color:var(--text-muted)">➕ Extra: <strong style="color:var(--warn)">R$ ${r.extra.toLocaleString('pt-BR',{minimumFractionDigits:2})}</strong></span>`:''}
+              ${r.dataPagExtra?`<span style="font-size:12px;color:var(--text-muted)">📅 Pgto: <strong style="color:var(--text-secondary)">${r.dataPagExtra}</strong></span>`:''}
+            </div>`:''}
           </div>
         </div>`).join('')}
       </div>
@@ -955,24 +1152,27 @@ function showToast(msg){const t=document.getElementById('toast');document.getEle
 // ═══════════════════════════════════════════════
 function loadDemo(){
   parseData([
-    {DATA:'13/05/2026',NOME:'SEREIA',IDADE:'21 ANOS',SEXO:'FEMEA',TUTOR:'RENATA',FC:'40 bpm (20-40)',FR:'12 rpm (8-24 rpm)','EXAME ORTOPÉDICO':'Realizado testes ok','RECOMENDAÇÕES':'Tratar o animal com carinho','MANUTENÇÃO':'Refazer exames em 15 dias','MEDICAÇÕES':'omeprazol','EXAMES':'raio x'},
-    {DATA:'13/04/2026',NOME:'SEREIA',IDADE:'21 ANOS',SEXO:'FEMEA',TUTOR:'RENATA',FC:'40 bpm (20-40)',FR:'12 rpm (8-24 rpm)','EXAME ORTOPÉDICO':'Realizado testes ok','RECOMENDAÇÕES':'Tratar o animal com carinho','MANUTENÇÃO':'Refazer exames em 15 dias','MEDICAÇÕES':'omeprazol','EXAMES':'ultrasom'},
-    {DATA:'13/03/2026',NOME:'SEREIA',IDADE:'21 ANOS',SEXO:'FEMEA',TUTOR:'RENATA',FC:'40 bpm (20-40)',FR:'12 rpm (8-24 rpm)','EXAME ORTOPÉDICO':'Realizado testes ok','RECOMENDAÇÕES':'Tratar o animal com carinho','MANUTENÇÃO':'Refazer exames em 15 dias','MEDICAÇÕES':'omeprazol','EXAMES':'infiltração e raio x'},
-    {DATA:'13/02/2026',NOME:'SEREIA',IDADE:'21 ANOS',SEXO:'FEMEA',TUTOR:'RENATA',FC:'40 bpm (20-40)',FR:'12 rpm (8-24 rpm)','EXAME ORTOPÉDICO':'Realizado testes ok','RECOMENDAÇÕES':'Tratar o animal com carinho','MANUTENÇÃO':'Refazer exames em 15 dias','MEDICAÇÕES':'','EXAMES':''},
-    {DATA:'12/06/2026',NOME:'TROVÃO',IDADE:'15 ANOS',SEXO:'MACHO',TUTOR:'EDUARDO',FC:'60 bpm (20-40)',FR:'12 rpm (8-24 rpm)','EXAME ORTOPÉDICO':'Realizado testes ok','RECOMENDAÇÕES':'Tratar o animal com carinho','MANUTENÇÃO':'Refazer exames em 15 dias','MEDICAÇÕES':'omeprazol','EXAMES':'raio x'},
-    {DATA:'13/05/2026',NOME:'BILU',IDADE:'18 ANOS',SEXO:'MACHO',TUTOR:'VITORIA',FC:'40 bpm (20-40)',FR:'12 rpm (8-24 rpm)','EXAME ORTOPÉDICO':'Realizado testes ok','RECOMENDAÇÕES':'Tratar o animal com carinho','MANUTENÇÃO':'Refazer exames em 15 dias','MEDICAÇÕES':'omeprazol','EXAMES':'infiltração e raio x'},
-    {DATA:'13/05/2026',NOME:'CÉU',IDADE:'20 ANOS',SEXO:'FEMEA',TUTOR:'JULIA',FC:'40 bpm (20-40)',FR:'12 rpm (8-24 rpm)','EXAME ORTOPÉDICO':'Realizado testes ok','RECOMENDAÇÕES':'Tratar o animal com carinho','MANUTENÇÃO':'Refazer exames em 15 dias','MEDICAÇÕES':'','EXAMES':'ultrasom'},
-    {DATA:'13/05/2026',NOME:'MAGRELA',IDADE:'15 ANOS',SEXO:'FEMEA',TUTOR:'CLAUDIA',FC:'40 bpm (20-40)',FR:'12 rpm (8-24 rpm)','EXAME ORTOPÉDICO':'Realizado testes ok','RECOMENDAÇÕES':'Tratar o animal com carinho','MANUTENÇÃO':'Refazer exames em 15 dias','MEDICAÇÕES':'omeprazol','EXAMES':'infiltração e raio x'},
-    {DATA:'13/05/2026',NOME:'SOL',IDADE:'10 ANOS',SEXO:'FEMEA',TUTOR:'ROZAURA',FC:'40 bpm (20-40)',FR:'12 rpm (8-24 rpm)','EXAME ORTOPÉDICO':'Realizado testes ok','RECOMENDAÇÕES':'Tratar o animal com carinho','MANUTENÇÃO':'Refazer exames em 15 dias','MEDICAÇÕES':'omeprazol','EXAMES':'raio x'},
-    {DATA:'13/04/2026',NOME:'SOL',IDADE:'10 ANOS',SEXO:'FEMEA',TUTOR:'ROZAURA',FC:'40 bpm (20-40)',FR:'12 rpm (8-24 rpm)','EXAME ORTOPÉDICO':'Realizado testes ok','RECOMENDAÇÕES':'Tratar o animal com carinho','MANUTENÇÃO':'Refazer exames em 15 dias','MEDICAÇÕES':'omeprazol','EXAMES':''},
-    {DATA:'13/02/2026',NOME:'SOL',IDADE:'10 ANOS',SEXO:'FEMEA',TUTOR:'ROZAURA',FC:'40 bpm (20-40)',FR:'12 rpm (8-24 rpm)','EXAME ORTOPÉDICO':'Realizado testes ok','RECOMENDAÇÕES':'Tratar o animal com carinho','MANUTENÇÃO':'Refazer exames em 15 dias','MEDICAÇÕES':'omeprazol','EXAMES':'infiltração e raio x'},
+    {DATA:'13/05/2026',NOME:'SEREIA',IDADE:'21 ANOS',SEXO:'FEMEA',TUTOR:'RENATA','Exame ortopédico':'Realizado testes ok','Recomendações':'Manter protocolo atual','Manutenção':'Refazer exames em 15 dias','Observações':'omeprazol','Exames realizados':'raio x','Vacinação':'14/02/2025','Provas':'Gaúcho','Valor mensalidade':200,'Valor extra':1000,'Data pagamento valor do valor extra':'13/05/2026'},
+    {DATA:'13/04/2026',NOME:'SEREIA',IDADE:'21 ANOS',SEXO:'FEMEA',TUTOR:'RENATA','Exame ortopédico':'Realizado testes ok','Manutenção':'Refazer exames em 15 dias','Observações':'omeprazol','Exames realizados':'ultrasom','Valor mensalidade':200,'Valor extra':500,'Data pagamento valor do valor extra':'13/05/2026'},
+    {DATA:'13/03/2026',NOME:'SEREIA',IDADE:'21 ANOS',SEXO:'FEMEA',TUTOR:'RENATA','Exame ortopédico':'Realizado testes ok','Manutenção':'Refazer exames em 15 dias','Observações':'omeprazol','Exames realizados':'infiltração e raio x','Valor mensalidade':200,'Valor extra':350,'Data pagamento valor do valor extra':'13/05/2026'},
+    {DATA:'13/02/2026',NOME:'SEREIA',IDADE:'21 ANOS',SEXO:'FEMEA',TUTOR:'RENATA','Exame ortopédico':'Realizado testes ok','Manutenção':'Refazer exames em 15 dias','Valor mensalidade':200,'Valor extra':1000,'Data pagamento valor do valor extra':'13/05/2026'},
+    {DATA:'13/06/2026',NOME:'TROVÃO',IDADE:'15 ANOS',SEXO:'MACHO',TUTOR:'EDUARDO','Exame ortopédico':'Realizado testes ok','Manutenção':'Refazer exames em 15 dias','Observações':'omeprazol','Exames realizados':'raio x','Vacinação':'13/06/2026','Provas':'Hípica','Valor mensalidade':200,'Valor extra':350,'Data pagamento valor do valor extra':'13/05/2026'},
+    {DATA:'13/05/2026',NOME:'BILU',IDADE:'18 ANOS',SEXO:'MACHO',TUTOR:'VITORIA','Exame ortopédico':'Realizado testes ok','Manutenção':'Refazer exames em 15 dias','Observações':'omeprazol','Exames realizados':'infiltração e raio x','Valor mensalidade':200,'Valor extra':350,'Data pagamento valor do valor extra':'13/05/2026'},
+    {DATA:'13/05/2026',NOME:'CÉU',IDADE:'20 ANOS',SEXO:'FEMEA',TUTOR:'JULIA','Exame ortopédico':'Realizado testes ok','Manutenção':'Refazer exames em 15 dias','Exames realizados':'ultrasom','Valor mensalidade':200,'Valor extra':250,'Data pagamento valor do valor extra':'13/05/2026'},
+    {DATA:'13/05/2026',NOME:'MAGRELA',IDADE:'15 ANOS',SEXO:'FEMEA',TUTOR:'CLAUDIA','Exame ortopédico':'Realizado testes ok','Manutenção':'Refazer exames em 15 dias','Observações':'omeprazol','Exames realizados':'infiltração e raio x','Vacinação':'10/02/2025','Valor mensalidade':200,'Valor extra':100,'Data pagamento valor do valor extra':'13/05/2026'},
+    {DATA:'13/05/2026',NOME:'SOL',IDADE:'10 ANOS',SEXO:'FEMEA',TUTOR:'ROZAURA','Exame ortopédico':'Realizado testes ok','Manutenção':'Refazer exames em 15 dias','Observações':'omeprazol','Exames realizados':'raio x','Vacinação':'13/05/2026','Valor mensalidade':200,'Valor extra':700,'Data pagamento valor do valor extra':'13/05/2026'},
+    {DATA:'13/04/2026',NOME:'SOL',IDADE:'10 ANOS',SEXO:'FEMEA',TUTOR:'ROZAURA','Exame ortopédico':'Realizado testes ok','Manutenção':'Refazer exames em 15 dias','Observações':'omeprazol','Valor mensalidade':200,'Valor extra':350,'Data pagamento valor do valor extra':'13/05/2026'},
+    {DATA:'13/03/2026',NOME:'SOL',IDADE:'10 ANOS',SEXO:'FEMEA',TUTOR:'ROZAURA','Exame ortopédico':'Realizado testes ok','Manutenção':'Refazer exames em 15 dias','Observações':'omeprazol','Valor mensalidade':200,'Valor extra':350,'Data pagamento valor do valor extra':'13/05/2026'},
+    {DATA:'13/05/2026',NOME:'BRUTOS',IDADE:'15 ANOS',SEXO:'MACHO',TUTOR:'EDUARDO','Exame ortopédico':'Realizado testes ok','Manutenção':'Refazer exames em 15 dias','Observações':'omeprazol','Valor mensalidade':200,'Valor extra':350,'Data pagamento valor do valor extra':'13/05/2026'},
+    {DATA:'13/04/2026',NOME:'BRUTOS',IDADE:'15 ANOS',SEXO:'MACHO',TUTOR:'EDUARDO','Exame ortopédico':'Realizado testes ok','Manutenção':'Refazer exames em 15 dias','Observações':'omeprazol','Valor mensalidade':200,'Valor extra':350,'Data pagamento valor do valor extra':'13/05/2026'},
+    {DATA:'13/03/2026',NOME:'BRUTOS',IDADE:'15 ANOS',SEXO:'MACHO',TUTOR:'EDUARDO','Exame ortopédico':'Realizado testes ok','Manutenção':'Refazer exames em 15 dias','Observações':'omeprazol','Vacinação':'13/04/2026','Valor mensalidade':200,'Valor extra':350,'Data pagamento valor do valor extra':'13/05/2026'}
   ]);
 }
 
 // ═══════════════════════════════════════════════
 //  LOCALSTORAGE — salva e recupera dados
 // ═══════════════════════════════════════════════
-const LS_KEY = 'equivet_dados_v1';
+const LS_KEY = 'equivet_dados_v2';
 
 function saveToStorage(){
   try{
@@ -986,10 +1186,24 @@ function loadFromStorage(){
     if(!raw) return false;
     const data = JSON.parse(raw);
     if(!data || !data.length) return false;
-    parseData(data);
+    // Invalida cache antigo (formato sem campo vaccine/provas/observacoes/mensalidade)
+    const sample = data[0];
+    if(!('vaccine' in sample) || !('provas' in sample) || !('observacoes' in sample) || !('mensalidade' in sample)){
+      localStorage.removeItem(LS_KEY);
+      return false;
+    }
+    // Restaura vaccine de cada registro (calcVaccineStatus não é serializado)
+    data.forEach(r=>{ r.vaccine = calcVaccineStatus(r.vacRaw); });
+    patients={};
+    allData=data;
+    allData.forEach(r=>{if(!patients[r.nome])patients[r.nome]=[];patients[r.nome].push(r);});
+    Object.keys(patients).forEach(n=>{patients[n].sort((a,b)=>parseDate(b.data)-parseDate(a.data));});
+    renderDashboard(); renderPatientList(); renderQRGrid();
+    document.getElementById('empty-dashboard').style.display='none';
+    document.getElementById('loaded-dashboard').style.display='block';
     showToast('✓ Dados restaurados do último acesso');
     return true;
-  } catch(e){ return false; }
+  } catch(e){ console.error('loadFromStorage:',e); return false; }
 }
 
 function clearStorage(){
